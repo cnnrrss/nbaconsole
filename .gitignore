@@ -1,5 +1,6 @@
 # Compiled source #
 ###################
+.main
 *.com
 *.class
 *.dll
@@ -35,6 +36,13 @@
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# builds
+build
+dist
+bin
+main
+!main.go
 
 # editors and others #
 ##########

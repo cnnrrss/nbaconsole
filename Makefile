@@ -1,5 +1,6 @@
 VERSION = $$(git describe --abbrev=0 --tags)
 COMMIT_REV = $$(git rev-list -n 1 $(VERSION))
+# SRCPATH := $(pwd)/
 
 all: build
 
@@ -10,10 +11,10 @@ run:
 	go run main.go
 
 build:
-	@go build main.go
+	@go build -o bin/nbaconsole *.go 
 
 clean:
-	go clean && \
+	@go clean && \
 	rm -rf bin/
 
 test:
