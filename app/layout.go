@@ -17,7 +17,9 @@ func (nba *NBAConsole) scoreBoardLayout(g *gocui.Gui) error {
 		nba.scoreboardView = v
 		nba.scoreboardView.Frame = false
 		nba.scoreboardView.BgColor = gocui.ColorBlack
-		nba.scoreboardView.FgColor = gocui.ColorWhite
+		nba.scoreboardView.FgColor = gocui.ColorMagenta
+		nba.scoreboardView.Autoscroll = true
+		nba.scoreboardView.Wrap = true
 
 		go func() {
 			// Make call to NBA API in goroutine
