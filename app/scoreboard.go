@@ -2,26 +2,37 @@ package nbaconsole
 
 import (
 	"fmt"
-	"log"
+	"io/ioutil"
 	"sync"
+
+	api "github.com/connorvanderhook/nbaconsole/api"
 )
 
 var scoreBoard, scoreBoardLock sync.Mutex
-var options = "" // no options for now
 
 func (nba *NBAConsole) getScoreboard() error {
 	scoreBoard.Lock()
 
-	results, err := nba.client.TodaysGames(options)
-	if err != nil {
-		log.Fatalf("couldn't fetch data")
+	params := map[string]string{
+		"DayOffset": "0",
+		"LeagueID":  "00",
+		"GameDate":  nba.date,
 	}
 
-	content := fmt.Sprintf("%s", results)
+	resp, err := api.ScoreboardV2(params)
+
+	if err != nil {
+		return fmt.Errorf("Error with request %v", err)
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("Error reading request body %v", err)
+	}
 
 	nba.update(func() {
 		nba.scoreboardView.Clear()
-		fmt.Fprintln(nba.scoreboardView, content)
+		fmt.Fprintln(nba.scoreboardView, "hello"+string(body))
 	})
 
 	scoreBoard.Unlock()

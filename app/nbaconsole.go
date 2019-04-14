@@ -7,15 +7,15 @@ import (
 
 	"github.com/connorvanderhook/nbaconsole/api"
 	"github.com/jroimartin/gocui"
+	"github.com/pkg/errors"
 )
-
-// TODO: organize types in proj
 
 // NBAConsole provides the context for running the app
 type NBAConsole struct {
 	g              *gocui.Gui
 	scoreboardView *gocui.View
 	client         *api.Client
+	date           string
 	debug          bool
 }
 
@@ -27,10 +27,12 @@ func NewNBAConsole(config *Config) *NBAConsole {
 	}
 
 	client := api.NewClient()
+	curDate := currentDate()
 
 	return &NBAConsole{
 		debug:  debug,
 		client: client,
+		date:   curDate,
 	}
 }
 
@@ -54,28 +56,20 @@ func (nba *NBAConsole) Start() {
 	/* --------------------------------------------------- */
 
 	// The terminal’s width and height are needed for layout calculations.
-	tWidth, tHeight := g.Size()
 	g.SetManagerFunc(layout)
 
 	if err := g.SetKeybinding("", gocui.KeyCtrlC, gocui.ModNone, quit); err != nil {
 		log.Panicln("Could not set key binding:", err)
 	}
-	/* --------------------------------------------------- */
-	// TODO: refactor to use nba.scoreBoardLayout()
-	scoreboardView, err := g.SetView(scoreBoardLayoutName, 0, 0, tWidth-4, tHeight-4)
-	if err != nil && err != gocui.ErrUnknownView {
-		log.Println("Failed to create scoreboardView:", err)
-		return
+
+	if err := g.SetKeybinding("", gocui.KeyEnter, gocui.ModNone, nil); err != nil {
+		log.Panicln("Could not set key binding:", err)
 	}
 
-	scoreboardView.FgColor = gocui.ColorMagenta
-	// Let the view scroll if the output exceeds the visible area.
-	scoreboardView.Autoscroll = true
-	scoreboardView.Wrap = true
-	nba.scoreboardView = scoreboardView
-
-	nba.getScoreboard()
-	/* --------------------------------------------------- */
+	if err := nba.scoreBoardLayout(g); err != nil {
+		log.Println(err)
+		return
+	}
 
 	if err := g.MainLoop(); err != nil && err != gocui.ErrQuit {
 		log.Fatalf("main loop: %v", err)
@@ -84,12 +78,18 @@ func (nba *NBAConsole) Start() {
 
 func layout(g *gocui.Gui) error {
 	// get current terminal size
-	maxX, maxY := g.Size()
-	if v, err := g.SetView("Welcome", maxX/2-13, maxY/2-5, maxX/2+13, maxY/2+5); err != nil {
+	tWidth, tHeight := g.Size()
+	if v, err := g.SetView("Welcome", tWidth/2-13, tHeight/2-5, tWidth/2+13, tHeight/2+5); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
 		fmt.Fprintln(v, nbaConsoleLogo)
+	}
+
+	// Scoreboard
+	_, err := g.SetView(scoreBoardLayoutName, 22, 0, tWidth, tHeight-1)
+	if err != nil {
+		return errors.Wrap(err, "Cannot update tasks view")
 	}
 	return nil
 }

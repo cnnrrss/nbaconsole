@@ -3,7 +3,7 @@ package cmd
 import (
 	"flag"
 
-	nba "github.com/connorvanderhook/nbaconsole/nbaconsole"
+	nba "github.com/connorvanderhook/nbaconsole/app"
 )
 
 // Run the app
