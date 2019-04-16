@@ -2,13 +2,6 @@ package api
 
 import "time"
 
-// type Scoreboard struct {
-// 	Parameters struct {
-// 		GameDate string `json:GameDate`
-// 	} `json:parameters`
-// 	ResultSets []LineScore
-// }
-
 type Scoreboard struct {
 	Resource   string `json:"resource"`
 	Parameters struct {
@@ -23,7 +16,7 @@ type Scoreboard struct {
 	} `json:"resultSets"`
 }
 
-type DataScoreBoard struct {
+type DataScoreboard struct {
 	Internal struct {
 		PubDateTime string `json:"pubDateTime"`
 		Xslt        string `json:"xslt"`
@@ -69,6 +62,26 @@ type DataScoreBoard struct {
 			Hours   string `json:"hours"`
 			Minutes string `json:"minutes"`
 		} `json:"gameDuration"`
+		Tags     []string `json:"tags"`
+		Playoffs struct {
+			RoundNum          string `json:"roundNum"`
+			ConfName          string `json:"confName"`
+			SeriesID          string `json:"seriesId"`
+			SeriesSummaryText string `json:"seriesSummaryText"`
+			IsSeriesCompleted bool   `json:"isSeriesCompleted"`
+			GameNumInSeries   string `json:"gameNumInSeries"`
+			IsIfNecessary     bool   `json:"isIfNecessary"`
+			VTeam             struct {
+				SeedNum        string `json:"seedNum"`
+				SeriesWin      string `json:"seriesWin"`
+				IsSeriesWinner bool   `json:"isSeriesWinner"`
+			} `json:"vTeam"`
+			HTeam struct {
+				SeedNum        string `json:"seedNum"`
+				SeriesWin      string `json:"seriesWin"`
+				IsSeriesWinner bool   `json:"isSeriesWinner"`
+			} `json:"hTeam"`
+		} `json:"playoffs"`
 		Period struct {
 			Current       int  `json:"current"`
 			Type          int  `json:"type"`
@@ -100,91 +113,91 @@ type DataScoreBoard struct {
 				Score string `json:"score"`
 			} `json:"linescore"`
 		} `json:"hTeam"`
-		Watch struct {
-			Broadcast struct {
-				Broadcasters struct {
-					National []struct {
-						ShortName string `json:"shortName"`
-						LongName  string `json:"longName"`
-					} `json:"national"`
-					Canadian []struct {
-						ShortName string `json:"shortName"`
-						LongName  string `json:"longName"`
-					} `json:"canadian"`
-					VTeam []struct {
-						ShortName string `json:"shortName"`
-						LongName  string `json:"longName"`
-					} `json:"vTeam"`
-					HTeam []struct {
-						ShortName string `json:"shortName"`
-						LongName  string `json:"longName"`
-					} `json:"hTeam"`
-					SpanishHTeam    []interface{} `json:"spanish_hTeam"`
-					SpanishVTeam    []interface{} `json:"spanish_vTeam"`
-					SpanishNational []interface{} `json:"spanish_national"`
-				} `json:"broadcasters"`
-				Video struct {
-					RegionalBlackoutCodes string `json:"regionalBlackoutCodes"`
-					CanPurchase           bool   `json:"canPurchase"`
-					IsLeaguePass          bool   `json:"isLeaguePass"`
-					IsNationalBlackout    bool   `json:"isNationalBlackout"`
-					IsTNTOT               bool   `json:"isTNTOT"`
-					IsVR                  bool   `json:"isVR"`
-					TntotIsOnAir          bool   `json:"tntotIsOnAir"`
-					IsNextVR              bool   `json:"isNextVR"`
-					IsNBAOnTNTVR          bool   `json:"isNBAOnTNTVR"`
-					IsMagicLeap           bool   `json:"isMagicLeap"`
-					IsOculusVenues        bool   `json:"isOculusVenues"`
-					Streams               []struct {
-						StreamType            string `json:"streamType"`
-						IsOnAir               bool   `json:"isOnAir"`
-						DoesArchiveExist      bool   `json:"doesArchiveExist"`
-						IsArchiveAvailToWatch bool   `json:"isArchiveAvailToWatch"`
-						StreamID              string `json:"streamId"`
-						Duration              int    `json:"duration"`
-					} `json:"streams"`
-					DeepLink []struct {
-						Broadcaster         string `json:"broadcaster"`
-						RegionalMarketCodes string `json:"regionalMarketCodes"`
-						IosApp              string `json:"iosApp"`
-						AndroidApp          string `json:"androidApp"`
-						DesktopWeb          string `json:"desktopWeb"`
-						MobileWeb           string `json:"mobileWeb"`
-					} `json:"deepLink"`
-				} `json:"video"`
-				Audio struct {
-					National struct {
-						Streams []struct {
-							Language string `json:"language"`
-							IsOnAir  bool   `json:"isOnAir"`
-							StreamID string `json:"streamId"`
-						} `json:"streams"`
-						Broadcasters []interface{} `json:"broadcasters"`
-					} `json:"national"`
-					VTeam struct {
-						Streams []struct {
-							Language string `json:"language"`
-							IsOnAir  bool   `json:"isOnAir"`
-							StreamID string `json:"streamId"`
-						} `json:"streams"`
-						Broadcasters []struct {
-							ShortName string `json:"shortName"`
-							LongName  string `json:"longName"`
-						} `json:"broadcasters"`
-					} `json:"vTeam"`
-					HTeam struct {
-						Streams []struct {
-							Language string `json:"language"`
-							IsOnAir  bool   `json:"isOnAir"`
-							StreamID string `json:"streamId"`
-						} `json:"streams"`
-						Broadcasters []struct {
-							ShortName string `json:"shortName"`
-							LongName  string `json:"longName"`
-						} `json:"broadcasters"`
-					} `json:"hTeam"`
-				} `json:"audio"`
-			} `json:"broadcast"`
-		} `json:"watch"`
+		// Watch struct {
+		// 	Broadcast struct {
+		// 		Broadcasters struct {
+		// 			National []struct {
+		// 				ShortName string `json:"shortName"`
+		// 				LongName  string `json:"longName"`
+		// 			} `json:"national"`
+		// 			Canadian []struct {
+		// 				ShortName string `json:"shortName"`
+		// 				LongName  string `json:"longName"`
+		// 			} `json:"canadian"`
+		// 			VTeam []struct {
+		// 				ShortName string `json:"shortName"`
+		// 				LongName  string `json:"longName"`
+		// 			} `json:"vTeam"`
+		// 			HTeam []struct {
+		// 				ShortName string `json:"shortName"`
+		// 				LongName  string `json:"longName"`
+		// 			} `json:"hTeam"`
+		// 			SpanishHTeam    []interface{} `json:"spanish_hTeam"`
+		// 			SpanishVTeam    []interface{} `json:"spanish_vTeam"`
+		// 			SpanishNational []interface{} `json:"spanish_national"`
+		// 		} `json:"broadcasters"`
+		// 		Video struct {
+		// 			RegionalBlackoutCodes string `json:"regionalBlackoutCodes"`
+		// 			CanPurchase           bool   `json:"canPurchase"`
+		// 			IsLeaguePass          bool   `json:"isLeaguePass"`
+		// 			IsNationalBlackout    bool   `json:"isNationalBlackout"`
+		// 			IsTNTOT               bool   `json:"isTNTOT"`
+		// 			IsVR                  bool   `json:"isVR"`
+		// 			TntotIsOnAir          bool   `json:"tntotIsOnAir"`
+		// 			IsNextVR              bool   `json:"isNextVR"`
+		// 			IsNBAOnTNTVR          bool   `json:"isNBAOnTNTVR"`
+		// 			IsMagicLeap           bool   `json:"isMagicLeap"`
+		// 			IsOculusVenues        bool   `json:"isOculusVenues"`
+		// 			Streams               []struct {
+		// 				StreamType            string `json:"streamType"`
+		// 				IsOnAir               bool   `json:"isOnAir"`
+		// 				DoesArchiveExist      bool   `json:"doesArchiveExist"`
+		// 				IsArchiveAvailToWatch bool   `json:"isArchiveAvailToWatch"`
+		// 				StreamID              string `json:"streamId"`
+		// 				Duration              int    `json:"duration"`
+		// 			} `json:"streams"`
+		// 			DeepLink []struct {
+		// 				Broadcaster         string `json:"broadcaster"`
+		// 				RegionalMarketCodes string `json:"regionalMarketCodes"`
+		// 				IosApp              string `json:"iosApp"`
+		// 				AndroidApp          string `json:"androidApp"`
+		// 				DesktopWeb          string `json:"desktopWeb"`
+		// 				MobileWeb           string `json:"mobileWeb"`
+		// 			} `json:"deepLink"`
+		// 		} `json:"video"`
+		// 		Audio struct {
+		// 			National struct {
+		// 				Streams []struct {
+		// 					Language string `json:"language"`
+		// 					IsOnAir  bool   `json:"isOnAir"`
+		// 					StreamID string `json:"streamId"`
+		// 				} `json:"streams"`
+		// 				Broadcasters []interface{} `json:"broadcasters"`
+		// 			} `json:"national"`
+		// 			VTeam struct {
+		// 				Streams []struct {
+		// 					Language string `json:"language"`
+		// 					IsOnAir  bool   `json:"isOnAir"`
+		// 					StreamID string `json:"streamId"`
+		// 				} `json:"streams"`
+		// 				Broadcasters []struct {
+		// 					ShortName string `json:"shortName"`
+		// 					LongName  string `json:"longName"`
+		// 				} `json:"broadcasters"`
+		// 			} `json:"vTeam"`
+		// 			HTeam struct {
+		// 				Streams []struct {
+		// 					Language string `json:"language"`
+		// 					IsOnAir  bool   `json:"isOnAir"`
+		// 					StreamID string `json:"streamId"`
+		// 				} `json:"streams"`
+		// 				Broadcasters []struct {
+		// 					ShortName string `json:"shortName"`
+		// 					LongName  string `json:"longName"`
+		// 				} `json:"broadcasters"`
+		// 			} `json:"hTeam"`
+		// 		} `json:"audio"`
+		// 	} `json:"broadcast"`
+		// } `json:"watch"`
 	} `json:"games"`
 }
