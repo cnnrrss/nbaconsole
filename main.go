@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/connorvanderhook/nbaconsole/cmd"
+	app "github.com/connorvanderhook/nbaconsole/app"
 )
 
 func main() {
-	cmd.Run()
+	nba := app.NewNBAConsole()
+	nba.Start()
 }
