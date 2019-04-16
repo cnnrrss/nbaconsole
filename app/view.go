@@ -5,7 +5,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// update update view
+// update passes in a function to update a NBAConsole view
 func (nba *NBAConsole) update(f func()) {
 	if nba.g == nil {
 		log.Fatal("gocui is not initialized")

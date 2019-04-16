@@ -4,7 +4,7 @@ import "time"
 
 const (
 	// YYYYMMDD is the NBA API Date format
-	YYYYMMDD = "2006-01-02"
+	YYYYMMDD = "20060102"
 )
 
 func currentDate() string {

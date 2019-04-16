@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/connorvanderhook/nbaconsole/api"
 	"github.com/jroimartin/gocui"
-	"github.com/pkg/errors"
 )
 
 // NBAConsole provides the context for running the app
@@ -15,12 +15,16 @@ type NBAConsole struct {
 	g              *gocui.Gui
 	scoreboardView *gocui.View
 	client         *api.Client
-	date           string
-	debug          bool
+	// TODO: don't hardcode date
+	date          string
+	forceRefresh  chan bool
+	refreshTicker *time.Ticker
+	rateLimiter   <-chan time.Time
+	debug         bool
 }
 
 // NewNBAConsole loads a new context for running the app
-func NewNBAConsole(config *Config) *NBAConsole {
+func NewNBAConsole() *NBAConsole {
 	var debug bool
 	if os.Getenv("DEBUG") != "" {
 		debug = true
@@ -30,9 +34,12 @@ func NewNBAConsole(config *Config) *NBAConsole {
 	curDate := currentDate()
 
 	return &NBAConsole{
-		debug:  debug,
-		client: client,
-		date:   curDate,
+		client:        client,
+		date:          curDate,
+		forceRefresh:  make(chan bool),
+		refreshTicker: time.NewTicker(1 * time.Minute),
+		rateLimiter:   time.Tick(10 * time.Second),
+		debug:         debug,
 	}
 }
 
@@ -77,20 +84,44 @@ func (nba *NBAConsole) Start() {
 }
 
 func layout(g *gocui.Gui) error {
-	// get current terminal size
-	tWidth, tHeight := g.Size()
-	if v, err := g.SetView("Welcome", tWidth/2-13, tHeight/2-5, tWidth/2+13, tHeight/2+5); err != nil {
+	if v, err := g.SetView("Welcome", 0, 0, 40, 2); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
-		fmt.Fprintln(v, nbaConsoleLogo)
+		v.Frame = true
+		fmt.Fprintf(v, "%5s\n", "Welcome to NBA Console")
 	}
+	return nil
+}
 
-	// Scoreboard
-	_, err := g.SetView(scoreBoardLayoutName, 22, 0, tWidth, tHeight-1)
-	if err != nil {
-		return errors.Wrap(err, "Cannot update tasks view")
-	}
+func (nba *NBAConsole) refresh() error {
+	go func() {
+		<-nba.rateLimiter
+		nba.forceRefresh <- true
+	}()
+	return nil
+}
+
+func (nba *NBAConsole) pollScoreboardData() {
+	go func() {
+		for {
+			select {
+			case <-nba.forceRefresh:
+				nba.refreshAll()
+			case <-nba.refreshTicker.C:
+				nba.refreshAll()
+			}
+		}
+	}()
+}
+
+func (nba *NBAConsole) refreshAll() error {
+	// TODO: do you need mutex or cache here?
+	go func() {
+		fmt.Fprintf(nba.scoreboardView, "refreshing...")
+		nba.getScoreboard()
+	}()
+
 	return nil
 }
 
