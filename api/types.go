@@ -4,6 +4,7 @@ import (
 	"time"
 )
 
+// Scoreboard is the api response using the stats api
 type Scoreboard struct {
 	Resource   string `json:"resource"`
 	Parameters struct {
@@ -18,6 +19,7 @@ type Scoreboard struct {
 	} `json:"resultSets"`
 }
 
+// DataScoreboard is the api response using the data api
 type DataScoreboard struct {
 	Internal struct {
 		PubDateTime string `json:"pubDateTime"`
@@ -28,6 +30,7 @@ type DataScoreboard struct {
 	Games    []Game `json:"games"`
 }
 
+// Game is the game data embedded in the DataScoreboard type
 type Game struct {
 	SeasonStageID int    `json:"seasonStageId"`
 	SeasonYear    string `json:"seasonYear"`
