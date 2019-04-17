@@ -84,7 +84,7 @@ func (nba *NBAConsole) setGames(sb api.DataScoreboard) error {
 		blob += PadCenter(gm.VTeam.TriCode, (curX/4)-3)
 		blob += PadCenter(gm.HTeam.TriCode, (curX/4)-3)
 		scoreOffset := len(hScore) + len(vScore) + 1
-		blob += PadCenter(fmt.Sprintf("%s - %s", hScore, vScore), (curX/4)+scoreOffset)
+		blob += PadCenter(fmt.Sprintf("%s - %s", vScore, hScore), (curX/4)+scoreOffset)
 		blob += PadCenter(gm.Status(), (curX/4)-scoreOffset)
 
 		if gm.Playoffs.RoundNum != "" {

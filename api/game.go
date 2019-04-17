@@ -25,10 +25,10 @@ func (g *Game) HasStarted() bool {
 // Status returns whether the game has started
 func (g *Game) Status() string {
 	currTime := time.Now().UTC()
-	if g.EndTimeUTC.Before(currTime) && g.StartTimeUTC.Before(currTime) {
+	if g.IsGameActivated {
+		return fmt.Sprintf("Q%d %s", g.Period.Current, g.Clock)
+	} else if g.StatusNum == 3 && g.StartTimeUTC.Before(currTime) {
 		return "Final"
-	} else if g.StatusNum < 3 && g.StartTimeUTC.Before(currTime) {
-		return fmt.Sprintf("Q%d", g.Period.Current)
 	}
 	return fmt.Sprintf("%v", g.StartTimeEastern)
 }

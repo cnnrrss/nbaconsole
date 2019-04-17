@@ -35,7 +35,7 @@ func NewNBAConsole() *NBAConsole {
 	return &NBAConsole{
 		date:          curDate,
 		forceRefresh:  make(chan bool),
-		refreshTicker: time.NewTicker(10 * time.Second),
+		refreshTicker: time.NewTicker(30 * time.Second),
 		rateLimiter:   time.Tick(10 * time.Second),
 		debug:         debug,
 	}
