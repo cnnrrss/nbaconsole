@@ -21,8 +21,6 @@ func keybindings(g *gocui.Gui) error {
 	return nil
 }
 
-// TODO: Modify MoveDown to different jump heights depending on view
-
 // MoveDown modifies the gocui cursor +1 on y axis
 func MoveDown(g *gocui.Gui, v *gocui.View) error {
 	_, y := g.CurrentView().Cursor()

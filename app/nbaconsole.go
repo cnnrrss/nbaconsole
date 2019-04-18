@@ -50,17 +50,13 @@ func (nba *NBAConsole) Start() {
 	nba.g = g
 	defer g.Close()
 
-	/* --------------------------------------------------- */
-	// TODO refactor to nba.Settings()
 	g.InputEsc = true
 	g.Mouse = true
 	g.Highlight = true
 	g.SelFgColor = gocui.ColorBlue
 	g.BgColor = gocui.ColorBlack
 	g.FgColor = gocui.ColorWhite
-	/* --------------------------------------------------- */
 
-	// The terminal’s width and height are needed for layout calculations.
 	g.SetManagerFunc(nba.layout)
 
 	if err = g.SetKeybinding("", gocui.KeyArrowUp, gocui.ModNone, MoveUp); err != nil {
@@ -86,7 +82,6 @@ func (nba *NBAConsole) Start() {
 }
 
 func (nba *NBAConsole) layout(g *gocui.Gui) error {
-	// done := make(chan bool)
 	tw, th := g.Size()
 	if v, err := g.SetView("welcome", 0, 0, tw, 2); err != nil {
 		if err != gocui.ErrUnknownView {
@@ -107,7 +102,7 @@ func (nba *NBAConsole) layout(g *gocui.Gui) error {
 		nba.scoreboard.Highlight = true
 		nba.scoreboard.BgColor = gocui.ColorBlack
 		nba.scoreboard.FgColor = gocui.ColorMagenta
-		// TODO: views shouldn't modify views
+
 		scoreBoardBox := NewBox(v, false)
 		nba.gamesList = scoreBoardBox
 		params := genericParams(nba.date)
@@ -116,7 +111,6 @@ func (nba *NBAConsole) layout(g *gocui.Gui) error {
 			// TODO: make this output to channel
 			nba.getScoreboard(params)
 		}()
-		// <-done
 		nba.pollScoreboardData(params)
 	}
 
