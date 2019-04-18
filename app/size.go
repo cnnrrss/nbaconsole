@@ -1,6 +1,11 @@
 package nbaconsole
 
-// Size returns window width and height
-func (nba *NBAConsole) size() (int, int) {
-	return nba.g.Size()
+import (
+	"github.com/jroimartin/gocui"
+)
+
+// relSize returns window width and height
+func relSize(g *gocui.Gui) (int, int) {
+	tw, th := g.Size()
+	return tw, th
 }

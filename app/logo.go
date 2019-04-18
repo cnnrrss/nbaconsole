@@ -1,5 +1,6 @@
 package nbaconsole
 
+// nbaConsoleLogo is the logo for the application
 var nbaConsoleLogo = `
          ________
 o       |   __   |

@@ -11,35 +11,29 @@ import (
 
 var scoreBoard, scoreBoardLock sync.Mutex
 
-func (nba *NBAConsole) getScoreboard() error {
+func (nba *NBAConsole) getScoreboard(params map[string]string) error {
 	scoreBoard.Lock()
-
-	// TODO: pass in params
-	params := map[string]string{
-		"DayOffset": "0",
-		"LeagueID":  "00",
-		"gameDate":  "20190318",
-	}
 
 	resp, err := api.GetDataScoreBoard(params)
 	if err != nil {
-		fmt.Fprintf(nba.scoreboardView, "Error happened on get scoreboard")
+		fmt.Fprintf(nba.scoreboard, "Error happened on get scoreboard")
 		return fmt.Errorf("Error with request %v", err)
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Fprintf(nba.scoreboardView, "Error happened on get scoreboard")
+		fmt.Fprintf(nba.scoreboard, "Error happened on get scoreboard")
 		return fmt.Errorf("Error reading request body %v", err)
 	}
 
 	sb := api.DataScoreboard{}
 	json.Unmarshal(body, &sb)
+	curW, _ := nba.g.Size()
 
 	nba.update(func() {
-		nba.scoreboardView.Clear()
-		fmt.Fprintf(nba.scoreboardView, "Games %s\n", nba.date)
-		fmt.Fprintln(nba.scoreboardView, formatGames(sb))
+		nba.scoreboard.Clear()
+		nba.setGames(sb)
+		nba.OuputScoreBoard(curW)
 	})
 
 	scoreBoard.Unlock()
@@ -47,26 +41,63 @@ func (nba *NBAConsole) getScoreboard() error {
 	return nil
 }
 
-func formatGames(sb api.DataScoreboard) string {
-	var resp string
-	for _, game := range sb.Games {
-		resp += fmt.Sprintf("----------------------------------\n")
-		if game.Playoffs.RoundNum != "" {
-			// if round num = 3 "Conference Finals"
-			resp += fmt.Sprintf("%s\n", game.Playoffs.SeriesSummaryText)
+// OuputScoreBoard prints the current games to the scoreboard view
+func (nba *NBAConsole) OuputScoreBoard(width int) {
+	if len(nba.gamesList.games) > 0 {
+		fmt.Fprintln(nba.scoreboard, formatScoreBoardHeader(width))
+		fmt.Fprintln(nba.scoreboard, boxSeparator(width))
+		for i, game := range nba.gamesList.games {
+			item := fmt.Sprintf("%s\n", game)
+			fmt.Fprintf(nba.scoreboard, string(i)+item)
+			fmt.Fprintln(nba.scoreboard, boxSeparator(width))
 		}
-		// TODO: handle overtimes
-		resp += fmt.Sprintf("Teams | Q1 | Q2 | Q3 | Q4 | Total\n")
-		resp += fmt.Sprintf("%-5s | ", game.HTeam.TriCode)
-		for _, q := range game.HTeam.Linescore {
-			resp += fmt.Sprintf(" %3v|", q.Score)
-		}
-		resp += fmt.Sprintf(" %s \n", game.HTeam.Score)
-		resp += fmt.Sprintf("%-5s | ", game.VTeam.TriCode)
-		for _, q := range game.VTeam.Linescore {
-			resp += fmt.Sprintf(" %3v|", q.Score)
-		}
-		resp += fmt.Sprintf(" %s \n", game.VTeam.Score)
+		return
 	}
-	return resp
+	fmt.Fprintln(nba.scoreboard, "Sorry no hoops today..")
+	return
+}
+
+// genericParams returns basic parameters to include in an API request
+func genericParams(date string) map[string]string {
+	params := map[string]string{
+		"DayOffset": "0",
+		"LeagueID":  "00",
+		"gameDate":  date,
+	}
+	return params
+}
+
+func formatScoreBoardHeader(width int) string {
+	var header string
+	for _, h := range []string{"Away", "Home", "Score", "Status"} {
+		header += PadCenter(h, width/4)
+	}
+	return header
+}
+
+func (nba *NBAConsole) setGames(sb api.DataScoreboard) error {
+	data := make([]interface{}, len(sb.Games))
+	curX, _ := nba.g.Size()
+	for i, gm := range sb.Games {
+		var blob string
+		hScore, vScore := gm.Score()
+		blob += PadCenter(gm.VTeam.TriCode, (curX/4)-3)
+		blob += PadCenter(gm.HTeam.TriCode, (curX/4)-3)
+		scoreOffset := len(hScore) + len(vScore) + 1
+		blob += PadCenter(fmt.Sprintf("%s - %s", hScore, vScore), (curX/4)+scoreOffset)
+		blob += PadCenter(gm.Status(), (curX/4)-scoreOffset)
+
+		if gm.Playoffs.RoundNum != "" {
+			blob += fmt.Sprintf("%s", PadLeft(gm.Playoffs.SeriesSummaryText, 6))
+		}
+		data[i] = blob
+	}
+
+	nba.gamesList.games = data
+	nba.gamesList.curIndex = 0
+	return nil
+}
+
+func boxSeparator(w int) string {
+	return fmt.Sprintf(Pad("-", w-1))
 }

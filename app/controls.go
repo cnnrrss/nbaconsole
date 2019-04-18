@@ -6,7 +6,6 @@ import (
 )
 
 func keybindings(g *gocui.Gui) error {
-
 	if err := g.SetKeybinding("", gocui.KeyCtrlC, gocui.ModNone, quit); err != nil {
 		log.Panicln(err)
 	}
@@ -22,33 +21,19 @@ func keybindings(g *gocui.Gui) error {
 	return nil
 }
 
-func (nba *NBAConsole) cursorDown() error {
-	if nba.scoreboardView == nil {
-		return nil
-	}
-	nba.scoreboardView.Origin()
-	cx, cy := nba.scoreboardView.Cursor()
+// TODO: Modify MoveDown to different jump heights depending on view
 
-	if err := nba.scoreboardView.SetCursor(cx, cy+1); err != nil {
-		ox, oy := nba.scoreboardView.Origin()
-		if err := nba.scoreboardView.SetOrigin(ox, oy+1); err != nil {
-			return err
-		}
-	}
+// MoveDown modifies the gocui cursor +1 on y axis
+func MoveDown(g *gocui.Gui, v *gocui.View) error {
+	_, y := g.CurrentView().Cursor()
+	v.SetCursor(0, y+1)
 	return nil
 }
 
-func (nba *NBAConsole) cursorUp() error {
-	if nba.scoreboardView == nil {
-		return nil
-	}
-	ox, oy := nba.scoreboardView.Origin()
-	cx, cy := nba.scoreboardView.Cursor()
-	if err := nba.scoreboardView.SetCursor(cx, cy-1); err != nil && oy > 0 {
-		if err := nba.scoreboardView.SetOrigin(ox, oy-1); err != nil {
-			return err
-		}
-	}
+// MoveUp modifies the gocui cursor +1 on y axis
+func MoveUp(g *gocui.Gui, v *gocui.View) error {
+	_, y := g.CurrentView().Cursor()
+	v.SetCursor(0, y-1)
 	return nil
 }
 

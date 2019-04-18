@@ -6,18 +6,18 @@ import (
 	"os"
 	"time"
 
-	"github.com/connorvanderhook/nbaconsole/api"
 	"github.com/jroimartin/gocui"
 )
 
 // NBAConsole provides the context for running the app
 type NBAConsole struct {
-	g              *gocui.Gui
-	scoreboardView *gocui.View
-	client         *api.Client
-	// TODO: don't hardcode date
+	g             *gocui.Gui
+	scoreboard    *gocui.View
+	helpView      *gocui.View
+	gamesList     *Box
 	date          string
 	forceRefresh  chan bool
+	done          chan bool
 	refreshTicker *time.Ticker
 	rateLimiter   <-chan time.Time
 	debug         bool
@@ -30,14 +30,12 @@ func NewNBAConsole() *NBAConsole {
 		debug = true
 	}
 
-	client := api.NewClient()
 	curDate := currentDate()
 
 	return &NBAConsole{
-		client:        client,
 		date:          curDate,
 		forceRefresh:  make(chan bool),
-		refreshTicker: time.NewTicker(1 * time.Minute),
+		refreshTicker: time.NewTicker(10 * time.Second),
 		rateLimiter:   time.Tick(10 * time.Second),
 		debug:         debug,
 	}
@@ -47,7 +45,7 @@ func NewNBAConsole() *NBAConsole {
 func (nba *NBAConsole) Start() {
 	g, err := gocui.NewGui(gocui.OutputNormal)
 	if err != nil {
-		log.Fatalf("new gocui: %v", err)
+		log.Fatalf("Failed to initialize new gocui: %v", err)
 	}
 	nba.g = g
 	defer g.Close()
@@ -63,34 +61,68 @@ func (nba *NBAConsole) Start() {
 	/* --------------------------------------------------- */
 
 	// The terminal’s width and height are needed for layout calculations.
-	g.SetManagerFunc(layout)
+	g.SetManagerFunc(nba.layout)
+
+	if err = g.SetKeybinding("", gocui.KeyArrowUp, gocui.ModNone, MoveUp); err != nil {
+		log.Fatal("Could not set keybinding:", err)
+	}
+
+	if err = g.SetKeybinding("", gocui.KeyArrowDown, gocui.ModNone, MoveDown); err != nil {
+		log.Fatal("Could not set keybinding:", err)
+	}
 
 	if err := g.SetKeybinding("", gocui.KeyCtrlC, gocui.ModNone, quit); err != nil {
-		log.Panicln("Could not set key binding:", err)
+		log.Fatal("Could not set keybinding:", err)
 	}
 
 	if err := g.SetKeybinding("", gocui.KeyEnter, gocui.ModNone, nil); err != nil {
-		log.Panicln("Could not set key binding:", err)
-	}
-
-	if err := nba.scoreBoardLayout(g); err != nil {
-		log.Println(err)
-		return
+		log.Fatal("Could not set keybinding:", err)
 	}
 
 	if err := g.MainLoop(); err != nil && err != gocui.ErrQuit {
-		log.Fatalf("main loop: %v", err)
+		log.Fatalf("main loop exiting: %v", err)
 	}
+	log.Println("Exiting")
 }
 
-func layout(g *gocui.Gui) error {
-	if v, err := g.SetView("Welcome", 0, 0, 40, 2); err != nil {
+func (nba *NBAConsole) layout(g *gocui.Gui) error {
+	// done := make(chan bool)
+	tw, th := g.Size()
+	if v, err := g.SetView("welcome", 0, 0, tw, 2); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
 		v.Frame = true
-		fmt.Fprintf(v, "%5s\n", "Welcome to NBA Console")
+		fmt.Fprintf(v, "%s\n", PadCenter("Welcome to NBA Console", tw/2))
 	}
+
+	tw, th = g.Size()
+	if v, err := g.SetView("scoreboard", 0, 3, tw, th); err != nil {
+		if err != gocui.ErrUnknownView {
+			return err
+		}
+		nba.scoreboard = v
+		nba.scoreboard.Frame = true
+		nba.scoreboard.Wrap = true
+		nba.scoreboard.Highlight = true
+		nba.scoreboard.BgColor = gocui.ColorBlack
+		nba.scoreboard.FgColor = gocui.ColorMagenta
+		// TODO: views shouldn't modify views
+		scoreBoardBox := NewBox(v, false)
+		nba.gamesList = scoreBoardBox
+		params := genericParams(nba.date)
+
+		go func() {
+			// TODO: make this output to channel
+			nba.getScoreboard(params)
+		}()
+		// <-done
+		nba.pollScoreboardData(params)
+	}
+
+	g.SetCurrentView("scoreboard")
+
+	// TODO: check curr width vs original width and redraw
 	return nil
 }
 
@@ -102,26 +134,25 @@ func (nba *NBAConsole) refresh() error {
 	return nil
 }
 
-func (nba *NBAConsole) pollScoreboardData() {
+func (nba *NBAConsole) pollScoreboardData(params map[string]string) {
 	go func() {
 		for {
 			select {
 			case <-nba.forceRefresh:
-				nba.refreshAll()
+				nba.refreshAll(params)
 			case <-nba.refreshTicker.C:
-				nba.refreshAll()
+				nba.refreshAll(params)
 			}
 		}
 	}()
 }
 
-func (nba *NBAConsole) refreshAll() error {
-	// TODO: do you need mutex or cache here?
+func (nba *NBAConsole) refreshAll(params map[string]string) error {
 	go func() {
-		fmt.Fprintf(nba.scoreboardView, "refreshing...")
-		nba.getScoreboard()
+		fmt.Fprintf(nba.scoreboard, "refreshing...")
+		nba.scoreboard.Clear()
+		nba.getScoreboard(params)
 	}()
-
 	return nil
 }
 
