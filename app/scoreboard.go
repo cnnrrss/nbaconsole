@@ -44,16 +44,16 @@ func (nba *NBAConsole) getScoreboard(params map[string]string) error {
 // OuputScoreBoard prints the current games to the scoreboard view
 func (nba *NBAConsole) OuputScoreBoard(width int) {
 	if len(nba.gamesList.games) > 0 {
-		fmt.Fprintln(nba.scoreboard, formatScoreBoardHeader(width))
-		fmt.Fprintln(nba.scoreboard, boxSeparator(width))
+		fmt.Fprintln(nba.scoreboard, formatScoreBoardHeader(width-2))
+		fmt.Fprintln(nba.scoreboard, boxSeparator(width-2))
 		for i, game := range nba.gamesList.games {
 			item := fmt.Sprintf("%s\n", game)
 			fmt.Fprintf(nba.scoreboard, string(i)+item)
-			fmt.Fprintln(nba.scoreboard, boxSeparator(width))
+			fmt.Fprintln(nba.scoreboard, boxSeparator(width-2))
 		}
 		return
 	}
-	fmt.Fprintln(nba.scoreboard, "Sorry no hoops today..")
+	fmt.Fprintln(nba.scoreboard, "Sorry no hoops today..\n", nba.date)
 	return
 }
 

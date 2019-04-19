@@ -1,6 +1,7 @@
 package nbaconsole
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -8,6 +9,8 @@ import (
 
 	"github.com/jroimartin/gocui"
 )
+
+var nbaDate string
 
 // NBAConsole provides the context for running the app
 type NBAConsole struct {
@@ -21,6 +24,13 @@ type NBAConsole struct {
 	refreshTicker *time.Ticker
 	rateLimiter   <-chan time.Time
 	debug         bool
+	curW          int
+	curH          int
+}
+
+func init() {
+	flag.StringVar(&nbaDate, "d", "", "optionally retrieve NBA scoreboard for date in YYYYMMDD format")
+	flag.Parse()
 }
 
 // NewNBAConsole loads a new context for running the app
@@ -30,10 +40,12 @@ func NewNBAConsole() *NBAConsole {
 		debug = true
 	}
 
-	curDate := currentDate()
+	if nbaDate == "" {
+		nbaDate = currentDate()
+	}
 
 	return &NBAConsole{
-		date:          curDate,
+		date:          nbaDate,
 		forceRefresh:  make(chan bool),
 		refreshTicker: time.NewTicker(30 * time.Second),
 		rateLimiter:   time.Tick(10 * time.Second),
@@ -48,6 +60,7 @@ func (nba *NBAConsole) Start() {
 		log.Fatalf("Failed to initialize new gocui: %v", err)
 	}
 	nba.g = g
+	nba.curW, nba.curH = g.Size()
 	defer g.Close()
 
 	g.InputEsc = true
@@ -83,7 +96,7 @@ func (nba *NBAConsole) Start() {
 
 func (nba *NBAConsole) layout(g *gocui.Gui) error {
 	tw, th := g.Size()
-	if v, err := g.SetView("welcome", 0, 0, tw, 2); err != nil {
+	if v, err := g.SetView("welcome", 1, 0, tw-1, 2); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
@@ -91,8 +104,8 @@ func (nba *NBAConsole) layout(g *gocui.Gui) error {
 		fmt.Fprintf(v, "%s\n", PadCenter("Welcome to NBA Console", tw/2))
 	}
 
-	tw, th = g.Size()
-	if v, err := g.SetView("scoreboard", 0, 3, tw, th); err != nil {
+	params := genericParams(nba.date)
+	if v, err := g.SetView("scoreboard", 1, 3, tw-1, th-1); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
@@ -105,7 +118,6 @@ func (nba *NBAConsole) layout(g *gocui.Gui) error {
 
 		scoreBoardBox := NewBox(v, false)
 		nba.gamesList = scoreBoardBox
-		params := genericParams(nba.date)
 
 		go func() {
 			// TODO: make this output to channel
@@ -116,7 +128,12 @@ func (nba *NBAConsole) layout(g *gocui.Gui) error {
 
 	g.SetCurrentView("scoreboard")
 
-	// TODO: check curr width vs original width and redraw
+	if nba.curW != tw || nba.curH != th {
+		nba.refreshAll(params)
+		nba.curW = tw
+		nba.curH = th
+	}
+
 	return nil
 }
 
