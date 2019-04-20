@@ -15,6 +15,8 @@ var nbaDate string
 // NBAConsole provides the context for running the app
 type NBAConsole struct {
 	g             *gocui.Gui
+	headers       *gocui.View
+	footerView    *gocui.View
 	scoreboard    *gocui.View
 	helpView      *gocui.View
 	gamesList     *Box
@@ -92,49 +94,6 @@ func (nba *NBAConsole) Start() {
 		log.Fatalf("main loop exiting: %v", err)
 	}
 	log.Println("Exiting")
-}
-
-func (nba *NBAConsole) layout(g *gocui.Gui) error {
-	tw, th := g.Size()
-	if v, err := g.SetView("welcome", 1, 0, tw-1, 2); err != nil {
-		if err != gocui.ErrUnknownView {
-			return err
-		}
-		v.Frame = true
-		fmt.Fprintf(v, "%s\n", PadCenter("Welcome to NBA Console", tw/2))
-	}
-
-	params := genericParams(nba.date)
-	if v, err := g.SetView("scoreboard", 1, 3, tw-1, th-1); err != nil {
-		if err != gocui.ErrUnknownView {
-			return err
-		}
-		nba.scoreboard = v
-		nba.scoreboard.Frame = true
-		nba.scoreboard.Wrap = true
-		nba.scoreboard.Highlight = true
-		nba.scoreboard.BgColor = gocui.ColorBlack
-		nba.scoreboard.FgColor = gocui.ColorMagenta
-
-		scoreBoardBox := NewBox(v, false)
-		nba.gamesList = scoreBoardBox
-
-		go func() {
-			// TODO: make this output to channel
-			nba.getScoreboard(params)
-		}()
-		nba.pollScoreboardData(params)
-	}
-
-	g.SetCurrentView("scoreboard")
-
-	if nba.curW != tw || nba.curH != th {
-		nba.refreshAll(params)
-		nba.curW = tw
-		nba.curH = th
-	}
-
-	return nil
 }
 
 func (nba *NBAConsole) refresh() error {

@@ -1,7 +1,6 @@
 # NBA Console
 A minimal NBA scoreboard presented in the terminal using gocui
 
-
 ## Usage 
 `cd path/to/nbaconsole`
 `go mod`
@@ -9,7 +8,6 @@ A minimal NBA scoreboard presented in the terminal using gocui
 ```
 ./bin/nbaconsole -d <YYYYMMDD> (optional date flag)
 ```
-
 
 ## Features
 Scoreboard View: View todays games

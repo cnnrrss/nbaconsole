@@ -53,7 +53,7 @@ func (nba *NBAConsole) OuputScoreBoard(width int) {
 		}
 		return
 	}
-	fmt.Fprintln(nba.scoreboard, "Sorry no hoops today..\n", nba.date)
+	fmt.Fprintf(nba.scoreboard, "Sorry no hoops today.. %v\n", nba.date)
 	return
 }
 
@@ -84,6 +84,12 @@ func (nba *NBAConsole) setGames(sb api.DataScoreboard) error {
 		blob += PadCenter(gm.VTeam.TriCode, (curX/4)-3)
 		blob += PadCenter(gm.HTeam.TriCode, (curX/4)-3)
 		scoreOffset := len(hScore) + len(vScore) + 1
+		if len(vScore) == 2 {
+			vScore = "_" + vScore
+		}
+		if len(hScore) == 2 {
+			hScore = "_" + hScore
+		}
 		blob += PadCenter(fmt.Sprintf("%s - %s", vScore, hScore), (curX/4)+scoreOffset)
 		blob += PadCenter(gm.Status(), (curX/4)-scoreOffset)
 
