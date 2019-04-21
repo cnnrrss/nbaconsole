@@ -7,11 +7,11 @@ all: build
 version:
 	@echo $(VERSION)
 
-run:
-	go run main.go
-
 build:
 	@go build -o bin/nbaconsole *.go 
+
+run:
+	./bin/nbaconsole
 
 clean:
 	@go clean && \
