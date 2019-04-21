@@ -41,6 +41,6 @@ func (nba *NBAConsole) keyfn(fn func() error) func(g *gocui.Gui, v *gocui.View) 
 	}
 }
 
-func (nba *NBAConsole) quit() error {
+func quit(g *gocui.Gui, v *gocui.View) error {
 	return gocui.ErrQuit
 }

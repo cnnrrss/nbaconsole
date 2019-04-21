@@ -31,7 +31,7 @@ type NBAConsole struct {
 }
 
 func init() {
-	flag.StringVar(&nbaDate, "d", "", "optionally retrieve NBA scoreboard for date in YYYYMMDD format")
+	flag.StringVar(&nbaDate, "d", "20190810", "optionally retrieve NBA scoreboard for date in YYYYMMDD format")
 	flag.Parse()
 }
 
@@ -124,8 +124,4 @@ func (nba *NBAConsole) refreshAll(params map[string]string) error {
 		nba.getScoreboard(params)
 	}()
 	return nil
-}
-
-func quit(g *gocui.Gui, v *gocui.View) error {
-	return gocui.ErrQuit
 }
