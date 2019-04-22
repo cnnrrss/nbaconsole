@@ -1,4 +1,4 @@
-package nbaconsole
+package app
 
 import (
 	"flag"
@@ -68,7 +68,7 @@ func (nba *NBAConsole) Start() {
 	g.InputEsc = true
 	g.Mouse = true
 	g.Highlight = true
-	g.SelFgColor = gocui.ColorBlue
+	g.SelFgColor = gocui.ColorRed
 	g.BgColor = gocui.ColorBlack
 	g.FgColor = gocui.ColorWhite
 

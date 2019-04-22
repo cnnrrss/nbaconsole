@@ -1,4 +1,4 @@
-package nbaconsole
+package app
 
 const version = "0.0.1"
 

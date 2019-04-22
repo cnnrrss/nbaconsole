@@ -1,12 +1,13 @@
-package nbaconsole
+package app
 
 import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"sync"
 
-	api "github.com/connorvanderhook/nbaconsole/api"
+	"github.com/cnnrrss/nbaconsole/api"
 )
 
 var scoreBoard, scoreBoardLock sync.Mutex
@@ -41,6 +42,12 @@ func (nba *NBAConsole) getScoreboard(params map[string]string) error {
 	return nil
 }
 
+var message = []string{
+	"Sorry no hoops today...",
+	"Ball is life.... ",
+	"Steph curry with the shot...",
+}
+
 // OuputScoreBoard prints the current games to the scoreboard view
 func (nba *NBAConsole) OuputScoreBoard(width int) {
 	if len(nba.gamesList.games) > 0 {
@@ -53,7 +60,8 @@ func (nba *NBAConsole) OuputScoreBoard(width int) {
 		}
 		return
 	}
-	fmt.Fprintf(nba.scoreboard, "Sorry no hoops today.. %v\n", nba.date)
+	n := rand.Intn(2)
+	fmt.Fprintf(nba.scoreboard, "%s %v\n", message[n], nba.date)
 	return
 }
 

@@ -1,7 +1,7 @@
 package main
 
 import (
-	app "github.com/connorvanderhook/nbaconsole/app"
+	"github.com/cnnrrss/nbaconsole/app"
 )
 
 func main() {

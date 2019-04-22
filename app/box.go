@@ -1,4 +1,4 @@
-package nbaconsole
+package app
 
 import (
 	"fmt"

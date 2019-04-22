@@ -1,4 +1,4 @@
-package nbaconsole
+package app
 
 // nbaConsoleLogo is the logo for the application
 var nbaConsoleLogo = `

@@ -1,4 +1,4 @@
-package nbaconsole
+package app
 
 import (
 	"github.com/jroimartin/gocui"

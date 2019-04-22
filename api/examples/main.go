@@ -7,7 +7,7 @@ import (
 	"log"
 	"net/http"
 
-	api "github.com/connorvanderhook/nbaconsole/api"
+	api "github.com/cnnrrss/nbaconsole/api"
 )
 
 // Game is a struct of the game
