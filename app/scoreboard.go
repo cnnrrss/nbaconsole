@@ -8,13 +8,22 @@ import (
 	"sync"
 
 	"github.com/cnnrrss/nbaconsole/api"
+	"github.com/cnnrrss/nbaconsole/common/pad"
+	"github.com/jroimartin/gocui"
 )
 
-var scoreBoard, scoreBoardLock sync.Mutex
+var (
+	scoreBoard, scoreBoardLock sync.Mutex
+	scoreBoardHeaders          = []string{"Home", "Away", "Score", "Status"}
+)
 
-func (nba *NBAConsole) getScoreboard(params map[string]string) error {
+// getScoreboard locks the current scoreBoard view and requests new data from
+// the NBA API. If the data is received, the scoreBoard view is written to stdout
+func (nba *NBAConsole) getScoreboard() error {
 	scoreBoard.Lock()
 
+	curW, _ := nba.g.Size()
+	params := genericParams(nba.date)
 	resp, err := api.GetDataScoreBoard(params)
 	if err != nil {
 		fmt.Fprintf(nba.scoreboard, "Error happened on get scoreboard")
@@ -29,12 +38,17 @@ func (nba *NBAConsole) getScoreboard(params map[string]string) error {
 
 	sb := api.DataScoreboard{}
 	json.Unmarshal(body, &sb)
-	curW, _ := nba.g.Size()
+	nba.g.Size()
 
 	nba.update(func() {
 		nba.scoreboard.Clear()
-		nba.setGames(sb)
+		nba.setGames(sb) // TODO: looping twice
 		nba.OuputScoreBoard(curW)
+		_, y := nba.scoreboard.Cursor()
+		nba.scoreboard.SetCursor(0, y+2)
+		nba.scoreboard.Highlight = true
+		nba.scoreboard.SelFgColor = gocui.ColorBlue
+		nba.scoreboard.SelBgColor = gocui.ColorDefault
 	})
 
 	scoreBoard.Unlock()
@@ -42,76 +56,48 @@ func (nba *NBAConsole) getScoreboard(params map[string]string) error {
 	return nil
 }
 
-var message = []string{
-	"Sorry no hoops today...",
-	"Ball is life.... ",
-	"Steph curry with the shot...",
-}
-
 // OuputScoreBoard prints the current games to the scoreboard view
 func (nba *NBAConsole) OuputScoreBoard(width int) {
-	if len(nba.gamesList.games) > 0 {
+	if len(nba.gamesList.Items) > 0 {
 		fmt.Fprintln(nba.scoreboard, formatScoreBoardHeader(width-2))
-		fmt.Fprintln(nba.scoreboard, boxSeparator(width-2))
-		for i, game := range nba.gamesList.games {
-			item := fmt.Sprintf("%s\n", game)
-			fmt.Fprintf(nba.scoreboard, string(i)+item)
-			fmt.Fprintln(nba.scoreboard, boxSeparator(width-2))
+		fmt.Fprintln(nba.scoreboard, pad.Left(fmt.Sprint("-"), nba.curW-1, "-"))
+		for _, g := range nba.gamesList.Items {
+			fmt.Fprintln(nba.scoreboard, g)
 		}
 		return
 	}
-	n := rand.Intn(2)
-	fmt.Fprintf(nba.scoreboard, "%s %v\n", message[n], nba.date)
+	fmt.Fprintf(nba.scoreboard, "%s %v\n", nbaMessages[rand.Intn(2)], nba.date)
 	return
-}
-
-// genericParams returns basic parameters to include in an API request
-func genericParams(date string) map[string]string {
-	params := map[string]string{
-		"DayOffset": "0",
-		"LeagueID":  "00",
-		"gameDate":  date,
-	}
-	return params
 }
 
 func formatScoreBoardHeader(width int) string {
 	var header string
-	for _, h := range []string{"Away", "Home", "Score", "Status"} {
-		header += PadCenter(h, width/4)
+	for i, h := range scoreBoardHeaders {
+		switch {
+		case i < len(scoreBoardHeaders)-1:
+			header += pad.Left(h, 6+(1*i), " ")
+		default:
+			header += pad.Left(h, 12, " ")
+		}
 	}
 	return header
 }
 
 func (nba *NBAConsole) setGames(sb api.DataScoreboard) error {
 	data := make([]interface{}, len(sb.Games))
-	curX, _ := nba.g.Size()
 	for i, gm := range sb.Games {
 		var blob string
 		hScore, vScore := gm.Score()
-		blob += PadCenter(gm.VTeam.TriCode, (curX/4)-3)
-		blob += PadCenter(gm.HTeam.TriCode, (curX/4)-3)
-		scoreOffset := len(hScore) + len(vScore) + 1
-		if len(vScore) == 2 {
-			vScore = "_" + vScore
-		}
-		if len(hScore) == 2 {
-			hScore = "_" + hScore
-		}
-		blob += PadCenter(fmt.Sprintf("%s - %s", vScore, hScore), (curX/4)+scoreOffset)
-		blob += PadCenter(gm.Status(), (curX/4)-scoreOffset)
-
+		blob += pad.Left(gm.VTeam.TriCode, 5, " ") // TODO: fix hardcoding
+		blob += pad.Left(gm.HTeam.TriCode, 7, " ")
+		blob += pad.Left(fmt.Sprintf("%s - %s", vScore, hScore), len(blob), " ")
+		blob += pad.Left(gm.Status(), 8, " ")
 		if gm.Playoffs.RoundNum != "" {
-			blob += fmt.Sprintf("%s", PadLeft(gm.Playoffs.SeriesSummaryText, 6))
+			blob += fmt.Sprintf("%s", pad.Left(gm.Playoffs.SeriesSummaryText, 6, " "))
 		}
 		data[i] = blob
 	}
-
-	nba.gamesList.games = data
-	nba.gamesList.curIndex = 0
+	nba.gamesList.Items = data
+	nba.gamesList.CurrentIndex = 0
 	return nil
-}
-
-func boxSeparator(w int) string {
-	return fmt.Sprintf(Pad("-", w-1))
 }

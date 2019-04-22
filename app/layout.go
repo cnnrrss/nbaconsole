@@ -23,23 +23,25 @@ var (
 	footerHeight = 2
 )
 
+//
 func (nba *NBAConsole) layout(g *gocui.Gui) error {
 	var err error
+	// terminal width and height
 	tw, th := g.Size()
-	params := genericParams(nba.date)
 
+	// set current app width and height
 	if nba.curW != tw || nba.curH != th {
-		nba.refreshAll(params)
+		nba.refresh()
 		nba.curW = tw
 		nba.curH = th
 	}
 
-	err = nba.setHeaderLayout(nba.g)
+	err = nba.setHeaderView(nba.g)
 	if err != nil {
 		return err
 	}
 
-	err = nba.setScoreboardLayout(nba.g, params)
+	err = nba.setScoreboardView(nba.g)
 	if err != nil {
 		return err
 	}
@@ -54,32 +56,32 @@ func (nba *NBAConsole) layout(g *gocui.Gui) error {
 	return nil
 }
 
-func (nba *NBAConsole) setHeaderLayout(g *gocui.Gui) error {
+func (nba *NBAConsole) setHeaderView(g *gocui.Gui) error {
 	if v, err := g.SetView(headerLabel, globalX0, headerY0, nba.curW-1, headerY1); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
 		v.Frame = true
-		fmt.Fprintf(v, "%s\n", PadCenter(globalLayout, nba.curW/2))
+		fmt.Fprintf(v, " %s\n", globalLayout)
 	}
 	return nil
 }
 
-func (nba *NBAConsole) setScoreboardLayout(g *gocui.Gui, params map[string]string) error {
+func (nba *NBAConsole) setScoreboardView(g *gocui.Gui) error {
 	if v, err := g.SetView(scoreboardLabel, globalX0, scoreboardY0, nba.curW-1, nba.curH-footerHeight-footerHeight); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
 
 		nba.scoreboard = v
+		nba.scoreboard.FgColor = gocui.ColorMagenta
 		scoreBoardBox := NewBox(v, false)
 		nba.gamesList = scoreBoardBox
 
 		go func() {
-			// TODO: make this output to channel
-			nba.getScoreboard(params)
+			nba.getScoreboard()
 		}()
-		nba.pollScoreboardData(params)
+		nba.pollScoreboardData()
 	}
 	return nil
 }
