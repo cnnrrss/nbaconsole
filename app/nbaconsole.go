@@ -2,6 +2,7 @@ package app
 
 import (
 	"log"
+	"math/rand"
 	"time"
 
 	"github.com/jroimartin/gocui"
@@ -19,6 +20,7 @@ type NBAConsole struct {
 	rateLimiter   <-chan time.Time
 	forceRefresh  chan bool
 	done          chan bool
+	message       string
 	date          string
 	debug         bool
 	curW          int
@@ -27,8 +29,10 @@ type NBAConsole struct {
 
 // NewNBAConsole loads a new context for running the app
 func NewNBAConsole(date string, debug bool) *NBAConsole {
+	msg := nbaMessages[rand.Intn(len(nbaMessages)-1)]
 	return &NBAConsole{
 		date:          date,
+		message:       msg,
 		forceRefresh:  make(chan bool),
 		refreshTicker: time.NewTicker(60 * time.Second),
 		rateLimiter:   time.Tick(10 * time.Second),

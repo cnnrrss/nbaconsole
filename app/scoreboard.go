@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"math/rand"
 	"sync"
 
 	"github.com/cnnrrss/nbaconsole/api"
@@ -66,7 +65,7 @@ func (nba *NBAConsole) OuputScoreBoard(width int) {
 		}
 		return
 	}
-	fmt.Fprintf(nba.scoreboard, "%s %v\n", nbaMessages[rand.Intn(2)], nba.date)
+	fmt.Fprintf(nba.scoreboard, "No hoops today, %s\n", nba.message)
 	return
 }
 

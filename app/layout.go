@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 
+	"github.com/cnnrrss/nbaconsole/common/pad"
 	"github.com/jroimartin/gocui"
 )
 
@@ -62,7 +63,8 @@ func (nba *NBAConsole) setHeaderView(g *gocui.Gui) error {
 			return err
 		}
 		v.Frame = true
-		fmt.Fprintf(v, " %s\n", globalLayout)
+		dateString := toHumanDateTime(nba.date)
+		fmt.Fprintf(v, " %s %s\n", globalLayout, pad.Left(dateString, len(globalLayout)+6, " ")) // TODO: no hardcode
 	}
 	return nil
 }
