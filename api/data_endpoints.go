@@ -10,3 +10,11 @@ func GetDataScoreBoard(params map[string]string) (resp *http.Response, err error
 	url := fmt.Sprintf("http://data.nba.net/10s/prod/v2/%s/scoreboard.json", params["gameDate"])
 	return apiGet(url, nil)
 }
+
+// GetDataGameBoxScore ...
+func GetDataGameBoxScore(params map[string]string, gameID string) (resp *http.Response, err error) {
+	url := fmt.Sprintf("http://data.nba.net/data/5s/json/cms/noseason/game/%s/%s/boxscore.json", params["gameDate"], gameID)
+	return apiGet(url, nil)
+}
+
+noseason/game/__date__/__gameId__/boxscore.json

@@ -88,6 +88,24 @@ func (nba *NBAConsole) setScoreboardView(g *gocui.Gui) error {
 	return nil
 }
 
+func (nba *NBAConsole) setBoxScoreView(g *gocui.Gui, gameID string) error {
+	if v, err := g.SetView("boxscore-{gameID}", globalX0, scoreboardY0, nba.curW-1, nba.curH-footerHeight-footerHeight); err != nil {
+		if err != gocui.ErrUnknownView {
+			return err
+		}
+
+		nba.boxScore = v
+		nba.boxScore.FgColor = gocui.ColorMagenta
+		boxScoreBox := NewBox(v, false)
+
+		go func() {
+			nba.getBoxScore(gameID)
+		}()
+		// nba.pollGameStats()
+	}
+	return nil
+}
+
 func (nba *NBAConsole) setFooterLayout(g *gocui.Gui) error {
 	if v, err := g.SetView("footerview", globalX0, nba.curH-1-footerHeight, nba.curW-1, nba.curH-1); err != nil {
 		if err != gocui.ErrUnknownView {

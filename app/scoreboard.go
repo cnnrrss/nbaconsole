@@ -25,20 +25,17 @@ func (nba *NBAConsole) getScoreboard() error {
 	params := genericParams(nba.date)
 	resp, err := api.GetDataScoreBoard(params)
 	if err != nil {
-		fmt.Fprintf(nba.scoreboard, "Error happened on get scoreboard")
 		return fmt.Errorf("Error with request %v", err)
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
+	defer body.Close()
 	if err != nil {
-		fmt.Fprintf(nba.scoreboard, "Error happened on get scoreboard")
 		return fmt.Errorf("Error reading request body %v", err)
 	}
 
 	sb := api.DataScoreboard{}
 	json.Unmarshal(body, &sb)
-	nba.g.Size()
-
 	nba.update(func() {
 		nba.scoreboard.Clear()
 		nba.setGames(sb) // TODO: looping twice

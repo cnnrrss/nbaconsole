@@ -26,6 +26,10 @@ func keybindings(g *gocui.Gui) error {
 		return err
 	}
 
+	if err := g.SetKeybinding(scoreboardLabel, gocui.KeyCtrlO, gocui.ModNone, nba.getBoxScore); err != nil {
+		return err
+	}
+
 	return nil
 }
 

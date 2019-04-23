@@ -14,6 +14,7 @@ type NBAConsole struct {
 	headers       *gocui.View
 	footerView    *gocui.View
 	scoreboard    *gocui.View
+	boxScore      *gocui.View
 	helpView      *gocui.View
 	gamesList     *Box
 	refreshTicker *time.Ticker
