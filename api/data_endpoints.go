@@ -11,10 +11,8 @@ func GetDataScoreBoard(params map[string]string) (resp *http.Response, err error
 	return apiGet(url, nil)
 }
 
-// GetDataGameBoxScore ...
+// GetDataGameBoxScore issues an apiGet request on the data API boscore endpoint
 func GetDataGameBoxScore(params map[string]string, gameID string) (resp *http.Response, err error) {
 	url := fmt.Sprintf("http://data.nba.net/data/5s/json/cms/noseason/game/%s/%s/boxscore.json", params["gameDate"], gameID)
 	return apiGet(url, nil)
 }
-
-noseason/game/__date__/__gameId__/boxscore.json
