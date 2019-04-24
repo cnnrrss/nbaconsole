@@ -30,10 +30,13 @@ type NBAConsole struct {
 
 // NewNBAConsole loads a new context for running the app
 func NewNBAConsole(date string, debug bool) *NBAConsole {
-	msg := nbaMessages[rand.Intn(len(nbaMessages)-1)]
+	if date == "" {
+		date = currentDate()
+	}
+
 	return &NBAConsole{
 		date:          date,
-		message:       msg,
+		message:       nbaMessages[rand.Intn(len(nbaMessages)-1)], // generate random hello
 		forceRefresh:  make(chan bool),
 		refreshTicker: time.NewTicker(60 * time.Second),
 		rateLimiter:   time.Tick(10 * time.Second),

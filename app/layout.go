@@ -96,7 +96,7 @@ func (nba *NBAConsole) setBoxScoreView(g *gocui.Gui, gameID string) error {
 
 		nba.boxScore = v
 		nba.boxScore.FgColor = gocui.ColorMagenta
-		boxScoreBox := NewBox(v, false)
+		// boxScoreBox := NewBox(v, false)
 
 		go func() {
 			nba.getBoxScore(gameID)

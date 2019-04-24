@@ -10,7 +10,7 @@ import (
 var gameDate string
 
 func init() {
-	flag.StringVar(&gameDate, "d", "20190810", "optionally retrieve NBA scoreboard for date in YYYYMMDD format")
+	flag.StringVar(&gameDate, "d", "", "optionally retrieve NBA scoreboard for date in YYYYMMDD format")
 }
 
 func main() {

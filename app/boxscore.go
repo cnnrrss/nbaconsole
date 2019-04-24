@@ -10,7 +10,7 @@ import (
 )
 
 func (nba *NBAConsole) getBoxScore(gameID string) error {
-	curW, _ := nba.g.Size()
+	_, curH := nba.g.Size()
 
 	params := genericParams(nba.date)
 	resp, err := api.GetDataGameBoxScore(params, gameID)
@@ -18,8 +18,7 @@ func (nba *NBAConsole) getBoxScore(gameID string) error {
 		return fmt.Errorf("Error with boxscore request %v", err)
 	}
 
-	body, err := ioutil.ReadAll(resp.body)
-	defer body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return fmt.Errorf("Error reading request body %v", err)
 	}
@@ -29,11 +28,11 @@ func (nba *NBAConsole) getBoxScore(gameID string) error {
 
 	nba.update(func() {
 		nba.scoreboard.Clear()
-		hm, aw := boxScore.Teams()
-		boxScore.PointsLeaders(hm, aw)
-		nba.scoreboard.SetCursor(0, y+2)
-		nba.scoreboard.Highlight = true
-		nba.scoreboard.SelFgColor = gocui.ColorBlue
-		nba.scoreboard.SelBgColor = gocui.ColorDefault
+		fmt.Fprintln(nba.boxScore, boxScore.PointsLeaders())
+		nba.boxScore.SetCursor(0, curH-2)
+		nba.boxScore.Highlight = true
+		nba.boxScore.SelFgColor = gocui.ColorBlue
+		nba.boxScore.SelBgColor = gocui.ColorDefault
 	})
+	return nil
 }

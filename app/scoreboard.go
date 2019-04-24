@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"strings"
 	"sync"
 
 	"github.com/cnnrrss/nbaconsole/api"
@@ -29,7 +30,6 @@ func (nba *NBAConsole) getScoreboard() error {
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
-	defer body.Close()
 	if err != nil {
 		return fmt.Errorf("Error reading request body %v", err)
 	}
@@ -39,7 +39,7 @@ func (nba *NBAConsole) getScoreboard() error {
 	nba.update(func() {
 		nba.scoreboard.Clear()
 		nba.setGames(sb) // TODO: looping twice
-		nba.OuputScoreBoard(curW)
+		nba.DrawScoreBoard(curW)
 		_, y := nba.scoreboard.Cursor()
 		nba.scoreboard.SetCursor(0, y+2)
 		nba.scoreboard.Highlight = true
@@ -52,8 +52,8 @@ func (nba *NBAConsole) getScoreboard() error {
 	return nil
 }
 
-// OuputScoreBoard prints the current games to the scoreboard view
-func (nba *NBAConsole) OuputScoreBoard(width int) {
+// DrawScoreBoard prints the current games to the scoreboard view
+func (nba *NBAConsole) DrawScoreBoard(width int) {
 	if len(nba.gamesList.Items) > 0 {
 		fmt.Fprintln(nba.scoreboard, formatScoreBoardHeader(width-2))
 		fmt.Fprintln(nba.scoreboard, pad.Left(fmt.Sprint("-"), nba.curW-1, "-"))
@@ -67,31 +67,31 @@ func (nba *NBAConsole) OuputScoreBoard(width int) {
 }
 
 func formatScoreBoardHeader(width int) string {
-	var header string
+	var str strings.Builder
 	for i, h := range scoreBoardHeaders {
 		switch {
 		case i < len(scoreBoardHeaders)-1:
-			header += pad.Left(h, 6+(1*i), " ")
+			str.WriteString(pad.Left(h, 6+(1*i), " "))
 		default:
-			header += pad.Left(h, 12, " ")
+			str.WriteString(pad.Left(h, 12, " "))
 		}
 	}
-	return header
+	return str.String()
 }
 
 func (nba *NBAConsole) setGames(sb api.DataScoreboard) error {
 	data := make([]interface{}, len(sb.Games))
 	for i, gm := range sb.Games {
-		var blob string
+		var blob strings.Builder
 		hScore, vScore := gm.Score()
-		blob += pad.Left(gm.VTeam.TriCode, 5, " ") // TODO: fix hardcoding
-		blob += pad.Left(gm.HTeam.TriCode, 7, " ")
-		blob += pad.Left(fmt.Sprintf("%s - %s", vScore, hScore), len(blob), " ")
-		blob += pad.Left(gm.Status(), 8, " ")
+		blob.WriteString(pad.Left(gm.VTeam.TriCode, 5, " ")) // TODO: fix hardcoding
+		blob.WriteString(pad.Left(gm.HTeam.TriCode, 7, " "))
+		blob.WriteString(pad.Left(fmt.Sprintf("%s - %s", vScore, hScore), blob.Len(), " "))
+		blob.WriteString(pad.Left(gm.Status(), 8, " "))
 		if gm.Playoffs.RoundNum != "" {
-			blob += fmt.Sprintf("%s", pad.Left(gm.Playoffs.SeriesSummaryText, 6, " "))
+			blob.WriteString(fmt.Sprintf("%s", pad.Left(gm.Playoffs.SeriesSummaryText, 6, " ")))
 		}
-		data[i] = blob
+		data[i] = blob.String()
 	}
 	nba.gamesList.Items = data
 	nba.gamesList.CurrentIndex = 0
