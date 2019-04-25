@@ -16,6 +16,8 @@ type NBAConsole struct {
 	scoreboard    *gocui.View
 	boxScore      *gocui.View
 	helpView      *gocui.View
+	Views         map[string]*gocui.View
+	selectedGame  *GameScore
 	gamesList     *Box
 	refreshTicker *time.Ticker
 	rateLimiter   <-chan time.Time
@@ -36,11 +38,11 @@ func NewNBAConsole(date string, debug bool) *NBAConsole {
 
 	return &NBAConsole{
 		date:          date,
+		debug:         debug,
 		message:       nbaMessages[rand.Intn(len(nbaMessages)-1)], // generate random hello
 		forceRefresh:  make(chan bool),
 		refreshTicker: time.NewTicker(60 * time.Second),
 		rateLimiter:   time.Tick(10 * time.Second),
-		debug:         debug,
 	}
 }
 
@@ -50,6 +52,7 @@ func (nba *NBAConsole) Start() {
 	if err != nil {
 		log.Fatalf("Failed to initialize new gocui: %v", err)
 	}
+	defer g.Close()
 
 	g.InputEsc = true
 	g.Mouse = true
@@ -60,10 +63,8 @@ func (nba *NBAConsole) Start() {
 
 	nba.g = g
 	nba.curW, nba.curH = g.Size()
-	defer g.Close()
-
 	g.SetManagerFunc(nba.layout)
-	keybindings(g)
+	nba.keybindings(g)
 
 	if err := g.MainLoop(); err != nil && err != gocui.ErrQuit {
 		log.Fatalf("main loop exiting: %v", err)

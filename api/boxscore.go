@@ -8,19 +8,23 @@ import (
 func (bs *GameBoxScore) PointsLeaders() string {
 	var str strings.Builder
 
-	home, away := bs.SportsContent.Game.Home, bs.SportsContent.Game.Visitor
-	str.WriteString(
-		fmt.Sprintf("%s %s %s\n",
-			home.Leaders.Points.Leader[0].FirstName,
-			home.Leaders.Points.Leader[0].LastName,
-			home.Leaders.Points.StatValue,
-		))
-	str.WriteString(
-		fmt.Sprintf("%s %s %s\n",
-			away.Leaders.Points.Leader[0].FirstName,
-			away.Leaders.Points.Leader[0].LastName,
-			away.Leaders.Points.StatValue,
-		))
+	if bs != nil {
+		home, away := bs.SportsContent.Game.Home, bs.SportsContent.Game.Visitor
+		str.WriteString(
+			fmt.Sprintf("%s %s %s\n",
+				home.Leaders.Points.Leader[0].FirstName,
+				home.Leaders.Points.Leader[0].LastName,
+				home.Leaders.Points.StatValue,
+			))
+		str.WriteString(
+			fmt.Sprintf("%s %s %s\n",
+				away.Leaders.Points.Leader[0].FirstName,
+				away.Leaders.Points.Leader[0].LastName,
+				away.Leaders.Points.StatValue,
+			))
+	} else {
+		str.WriteString("errrr getting points leaders")
+	}
 	return str.String()
 }
 

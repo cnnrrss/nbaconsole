@@ -9,7 +9,6 @@ import (
 
 	"github.com/cnnrrss/nbaconsole/api"
 	"github.com/cnnrrss/nbaconsole/common/pad"
-	"github.com/jroimartin/gocui"
 )
 
 var (
@@ -42,9 +41,9 @@ func (nba *NBAConsole) getScoreboard() error {
 		nba.DrawScoreBoard(curW)
 		_, y := nba.scoreboard.Cursor()
 		nba.scoreboard.SetCursor(0, y+2)
-		nba.scoreboard.Highlight = true
-		nba.scoreboard.SelFgColor = gocui.ColorBlue
-		nba.scoreboard.SelBgColor = gocui.ColorDefault
+		// nba.scoreboard.Highlight = true
+		// nba.scoreboard.SelFgColor = gocui.ColorBlue
+		// nba.scoreboard.SelBgColor = gocui.ColorDefault
 	})
 
 	scoreBoard.Unlock()
@@ -58,7 +57,7 @@ func (nba *NBAConsole) DrawScoreBoard(width int) {
 		fmt.Fprintln(nba.scoreboard, formatScoreBoardHeader(width-2))
 		fmt.Fprintln(nba.scoreboard, pad.Left(fmt.Sprint("-"), nba.curW-1, "-"))
 		for _, g := range nba.gamesList.Items {
-			fmt.Fprintln(nba.scoreboard, g)
+			fmt.Fprintln(nba.scoreboard, g.Msg, g.ID)
 		}
 		return
 	}
@@ -80,8 +79,7 @@ func formatScoreBoardHeader(width int) string {
 }
 
 func (nba *NBAConsole) setGames(sb api.DataScoreboard) error {
-	data := make([]interface{}, len(sb.Games))
-	for i, gm := range sb.Games {
+	for _, gm := range sb.Games {
 		var blob strings.Builder
 		hScore, vScore := gm.Score()
 		blob.WriteString(pad.Left(gm.VTeam.TriCode, 5, " ")) // TODO: fix hardcoding
@@ -91,9 +89,8 @@ func (nba *NBAConsole) setGames(sb api.DataScoreboard) error {
 		if gm.Playoffs.RoundNum != "" {
 			blob.WriteString(fmt.Sprintf("%s", pad.Left(gm.Playoffs.SeriesSummaryText, 6, " ")))
 		}
-		data[i] = blob.String()
+		nba.gamesList.Items = append(nba.gamesList.Items, &GameScore{Msg: blob.String(), ID: gm.GameID})
 	}
-	nba.gamesList.Items = data
 	nba.gamesList.CurrentIndex = 0
 	return nil
 }

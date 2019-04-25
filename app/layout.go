@@ -12,7 +12,7 @@ var (
 
 	globalX0 = 1
 
-	headerLabel  = "welcome"
+	headerLabel  = "NBA Console"
 	headerY0     = 0
 	headerHeight = 2
 	headerY1     = headerY0 + headerHeight
@@ -58,11 +58,12 @@ func (nba *NBAConsole) layout(g *gocui.Gui) error {
 }
 
 func (nba *NBAConsole) setHeaderView(g *gocui.Gui) error {
-	if v, err := g.SetView(headerLabel, globalX0, headerY0, nba.curW-1, headerY1); err != nil {
+	if v, err := g.SetView(globalLayout, globalX0, headerY0, nba.curW-1, headerY1); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
 		v.Frame = true
+		v.Title = headerLabel
 		dateString := toHumanDateTime(nba.date)
 		fmt.Fprintf(v, " %s %s\n", globalLayout, pad.Left(dateString, len(globalLayout)+6, " ")) // TODO: no hardcode
 	}
@@ -74,7 +75,7 @@ func (nba *NBAConsole) setScoreboardView(g *gocui.Gui) error {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
-
+		v.Title = "Scoreboard"
 		nba.scoreboard = v
 		nba.scoreboard.FgColor = gocui.ColorMagenta
 		scoreBoardBox := NewBox(v, false)
@@ -89,17 +90,16 @@ func (nba *NBAConsole) setScoreboardView(g *gocui.Gui) error {
 }
 
 func (nba *NBAConsole) setBoxScoreView(g *gocui.Gui, gameID string) error {
-	if v, err := g.SetView("boxscore-{gameID}", globalX0, scoreboardY0, nba.curW-1, nba.curH-footerHeight-footerHeight); err != nil {
+	if v, err := g.SetView("boxscore", globalX0, scoreboardY0, nba.curW-1, nba.curH-footerHeight-footerHeight); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
 
 		nba.boxScore = v
 		nba.boxScore.FgColor = gocui.ColorMagenta
-		// boxScoreBox := NewBox(v, false)
 
 		go func() {
-			nba.getBoxScore(gameID)
+			nba.getBoxScore()
 		}()
 		// nba.pollGameStats()
 	}

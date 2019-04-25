@@ -18,10 +18,15 @@ type Page struct {
 type Box struct {
 	*gocui.View  // inline a gocui View
 	Title        string
-	Items        []interface{}
+	Items        []*GameScore
 	Pages        []Page
 	CurrentIndex int
 	Ordered      bool
+}
+
+type GameScore struct {
+	Msg string
+	ID  string
 }
 
 // NewBox initializes a Box object with an existing gocui.View
@@ -38,7 +43,7 @@ func NewBox(v *gocui.View, ordered bool) *Box {
 
 // Wipe wipes a box from the terminal
 func (b *Box) Wipe() {
-	b.Items = make([]interface{}, 0)
+	b.Items = make([]*GameScore, 0)
 	b.Pages = []Page{}
 	b.Clear()
 	b.SetCursor(0, 0)
