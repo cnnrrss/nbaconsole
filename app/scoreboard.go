@@ -9,6 +9,7 @@ import (
 
 	"github.com/cnnrrss/nbaconsole/api"
 	"github.com/cnnrrss/nbaconsole/common/pad"
+	"github.com/jroimartin/gocui"
 )
 
 var (
@@ -41,9 +42,9 @@ func (nba *NBAConsole) getScoreboard() error {
 		nba.DrawScoreBoard(curW)
 		_, y := nba.scoreboard.Cursor()
 		nba.scoreboard.SetCursor(0, y+2)
-		// nba.scoreboard.Highlight = true
-		// nba.scoreboard.SelFgColor = gocui.ColorBlue
-		// nba.scoreboard.SelBgColor = gocui.ColorDefault
+		nba.scoreboard.Highlight = true
+		nba.scoreboard.SelFgColor = gocui.ColorBlue
+		nba.scoreboard.SelBgColor = gocui.ColorDefault
 	})
 
 	scoreBoard.Unlock()
@@ -57,7 +58,7 @@ func (nba *NBAConsole) DrawScoreBoard(width int) {
 		fmt.Fprintln(nba.scoreboard, formatScoreBoardHeader(width-2))
 		fmt.Fprintln(nba.scoreboard, pad.Left(fmt.Sprint("-"), nba.curW-1, "-"))
 		for _, g := range nba.gamesList.Items {
-			fmt.Fprintln(nba.scoreboard, g.Msg, g.ID)
+			fmt.Fprintln(nba.scoreboard, g.Msg)
 		}
 		return
 	}
