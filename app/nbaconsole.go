@@ -54,13 +54,6 @@ func (nba *NBAConsole) Start() {
 	}
 	defer g.Close()
 
-	g.InputEsc = true
-	g.Mouse = true
-	g.Highlight = true
-	g.Cursor = true
-	g.BgColor = gocui.ColorBlack
-	g.FgColor = gocui.ColorWhite
-
 	nba.g = g
 	nba.curW, nba.curH = g.Size()
 	g.SetManagerFunc(nba.layout)

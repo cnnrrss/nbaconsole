@@ -3,13 +3,13 @@ package app
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"strings"
 	"sync"
 
 	"github.com/cnnrrss/nbaconsole/api"
 	"github.com/cnnrrss/nbaconsole/common/pad"
-	"github.com/jroimartin/gocui"
 )
 
 var (
@@ -39,12 +39,10 @@ func (nba *NBAConsole) getScoreboard() error {
 	nba.update(func() {
 		nba.scoreboard.Clear()
 		nba.setGames(sb) // TODO: looping twice
-		nba.DrawScoreBoard(curW)
+		nba.DrawScoreBoard(nba.scoreboard, curW)
 		_, y := nba.scoreboard.Cursor()
 		nba.scoreboard.SetCursor(0, y+2)
 		nba.scoreboard.Highlight = true
-		nba.scoreboard.SelFgColor = gocui.ColorBlue
-		nba.scoreboard.SelBgColor = gocui.ColorDefault
 	})
 
 	scoreBoard.Unlock()
@@ -53,17 +51,16 @@ func (nba *NBAConsole) getScoreboard() error {
 }
 
 // DrawScoreBoard prints the current games to the scoreboard view
-func (nba *NBAConsole) DrawScoreBoard(width int) {
+func (nba *NBAConsole) DrawScoreBoard(output io.Writer, width int) {
 	if len(nba.gamesList.Items) > 0 {
-		fmt.Fprintln(nba.scoreboard, formatScoreBoardHeader(width-2))
-		fmt.Fprintln(nba.scoreboard, pad.Left(fmt.Sprint("-"), nba.curW-1, "-"))
+		fmt.Fprintln(output, formatScoreBoardHeader(width-2))
+		fmt.Fprintln(output, pad.Left(fmt.Sprint("-"), nba.curW-1, "-"))
 		for _, g := range nba.gamesList.Items {
-			fmt.Fprintln(nba.scoreboard, g.Msg)
+			fmt.Fprintln(output, g.Msg)
 		}
 		return
 	}
-	fmt.Fprintf(nba.scoreboard, "No hoops today, %s\n", nba.message)
-	return
+	fmt.Fprintf(output, "No hoops today, %s\n", nba.message)
 }
 
 func formatScoreBoardHeader(width int) string {
@@ -73,25 +70,24 @@ func formatScoreBoardHeader(width int) string {
 		case i < len(scoreBoardHeaders)-1:
 			str.WriteString(pad.Left(h, 6+(1*i), " "))
 		default:
-			str.WriteString(pad.Left(h, 12, " "))
+			str.WriteString(pad.Left(h, 17, " "))
 		}
 	}
 	return str.String()
 }
 
-func (nba *NBAConsole) setGames(sb api.DataScoreboard) error {
+func (nba *NBAConsole) setGames(sb api.DataScoreboard) {
 	for _, gm := range sb.Games {
 		var blob strings.Builder
 		hScore, vScore := gm.Score()
-		blob.WriteString(pad.Left(gm.VTeam.TriCode, 5, " ")) // TODO: fix hardcoding
+		blob.WriteString(pad.Left(gm.VTeam.TriCode, 5, " "))
 		blob.WriteString(pad.Left(gm.HTeam.TriCode, 7, " "))
 		blob.WriteString(pad.Left(fmt.Sprintf("%s - %s", vScore, hScore), blob.Len(), " "))
-		blob.WriteString(pad.Left(gm.Status(), 8, " "))
+		blob.WriteString(pad.Left(gm.Status(), 14, " "))
 		if gm.Playoffs.RoundNum != "" {
 			blob.WriteString(fmt.Sprintf("%s", pad.Left(gm.Playoffs.SeriesSummaryText, 6, " ")))
 		}
 		nba.gamesList.Items = append(nba.gamesList.Items, &GameScore{Msg: blob.String(), ID: gm.GameID})
 	}
 	nba.gamesList.CurrentIndex = 0
-	return nil
 }

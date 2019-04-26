@@ -77,7 +77,6 @@ func (nba *NBAConsole) setScoreboardView(g *gocui.Gui) error {
 		}
 		v.Title = "Scoreboard"
 		nba.scoreboard = v
-		nba.scoreboard.FgColor = gocui.ColorMagenta
 		scoreBoardBox := NewBox(v, false)
 		nba.gamesList = scoreBoardBox
 
