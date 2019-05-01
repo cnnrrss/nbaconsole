@@ -3,7 +3,6 @@ package app
 import (
 	"fmt"
 
-	"github.com/cnnrrss/nbaconsole/common/pad"
 	"github.com/jroimartin/gocui"
 )
 
@@ -64,8 +63,8 @@ func (nba *NBAConsole) setHeaderView(g *gocui.Gui) error {
 		}
 		v.Frame = true
 		v.Title = headerLabel
-		dateString := toHumanDateTime(nba.date)
-		fmt.Fprintf(v, " %s %s\n", globalLayout, pad.Left(dateString, len(globalLayout)+6, " ")) // TODO: no hardcode
+		dateString := toHumanDate(nba.date)
+		fmt.Fprintf(v, fmt.Sprintf(" %s%s%s\n", globalLayout, addSpaces(4), dateString))
 	}
 	return nil
 }
@@ -75,9 +74,9 @@ func (nba *NBAConsole) setScoreboardView(g *gocui.Gui) error {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
+
 		v.Title = "Scoreboard"
 		nba.scoreboard = v
-		nba.scoreboard.FgColor = gocui.ColorMagenta
 		scoreBoardBox := NewBox(v, false)
 		nba.gamesList = scoreBoardBox
 
@@ -96,12 +95,10 @@ func (nba *NBAConsole) setBoxScoreView(g *gocui.Gui, gameID string) error {
 		}
 
 		nba.boxScore = v
-		nba.boxScore.FgColor = gocui.ColorMagenta
 
 		go func() {
 			nba.getBoxScore()
 		}()
-		// nba.pollGameStats()
 	}
 	return nil
 }

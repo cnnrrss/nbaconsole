@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/cnnrrss/nbaconsole/common/pad"
 )
@@ -15,7 +16,9 @@ func (nba *NBAConsole) updateFooter(s string) {
 		nba.footerView.Clear()
 		base := fmt.Sprintf("%s: [Q]", quitText)
 		v := fmt.Sprintf(" Version: [%s]", nba.version())
-		str := pad.Left(fmt.Sprintf("%s", base), 8, " ")
-		fmt.Fprintln(nba.footerView, fmt.Sprintf("%s %s", v, str))
+		str := pad.Left(base, 8, " ")
+		nba.lastUpdated = time.Now()
+		upd := fmt.Sprintf("Last Updated: [%s]", toHumanTime(nba.lastUpdated))
+		fmt.Fprintln(nba.footerView, fmt.Sprintf("%s %s %s", v, str, upd))
 	})
 }

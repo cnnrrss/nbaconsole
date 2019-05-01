@@ -10,24 +10,32 @@ import (
 
 // NBAConsole provides the context for running the app
 type NBAConsole struct {
-	g             *gocui.Gui
-	headers       *gocui.View
-	footerView    *gocui.View
-	scoreboard    *gocui.View
-	boxScore      *gocui.View
-	helpView      *gocui.View
-	Views         map[string]*gocui.View
-	selectedGame  *GameScore
-	gamesList     *Box
+	// gocui User Interface
+	g *gocui.Gui
+
+	// Views
+	footerView *gocui.View
+	scoreboard *gocui.View
+	boxScore   *gocui.View
+	helpView   *gocui.View
+
+	// refresh ticker
 	refreshTicker *time.Ticker
 	rateLimiter   <-chan time.Time
+	lastUpdated   time.Time
 	forceRefresh  chan bool
 	done          chan bool
-	message       string
-	date          string
-	debug         bool
-	curW          int
-	curH          int
+
+	// stateful nba game data
+	selectedGame string
+	gamesList    *Box
+
+	// additional console state
+	message string
+	date    string
+	debug   bool
+	curW    int
+	curH    int
 }
 
 // NewNBAConsole loads a new context for running the app
@@ -41,8 +49,9 @@ func NewNBAConsole(date string, debug bool) *NBAConsole {
 		debug:         debug,
 		message:       nbaMessages[rand.Intn(len(nbaMessages)-1)], // generate random hello
 		forceRefresh:  make(chan bool),
-		refreshTicker: time.NewTicker(60 * time.Second),
+		refreshTicker: time.NewTicker(20 * time.Second),
 		rateLimiter:   time.Tick(10 * time.Second),
+		lastUpdated:   time.Now(),
 	}
 }
 

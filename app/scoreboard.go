@@ -13,16 +13,14 @@ import (
 )
 
 var (
-	scoreBoard, scoreBoardLock sync.Mutex
-	scoreBoardHeaders          = []string{"Home", "Away", "Score", "Status"}
+	scoreBoard        sync.Mutex
+	scoreBoardHeaders = []string{"Home", "Away", "Score", "Status"}
 )
 
 // getScoreboard locks the current scoreBoard view and requests new data from
 // the NBA API. If the data is received, the scoreBoard view is written to stdout
 func (nba *NBAConsole) getScoreboard() error {
-	scoreBoard.Lock()
 
-	curW, _ := nba.g.Size()
 	params := genericParams(nba.date)
 	resp, err := api.GetDataScoreBoard(params)
 	if err != nil {
@@ -36,17 +34,17 @@ func (nba *NBAConsole) getScoreboard() error {
 
 	sb := api.DataScoreboard{}
 	json.Unmarshal(body, &sb)
+
+	scoreBoard.Lock()
 	nba.update(func() {
+		curW, _ := nba.g.Size()
 		nba.scoreboard.Clear()
-		nba.setGames(sb) // TODO: looping twice
-		nba.DrawScoreBoard(curW)
+		nba.drawScoreboard(sb, curW)
 		_, y := nba.scoreboard.Cursor()
 		nba.scoreboard.SetCursor(0, y+2)
-		nba.scoreboard.Highlight = true
 		nba.scoreboard.SelFgColor = gocui.ColorBlue
 		nba.scoreboard.SelBgColor = gocui.ColorDefault
 	})
-
 	scoreBoard.Unlock()
 
 	return nil
@@ -54,16 +52,15 @@ func (nba *NBAConsole) getScoreboard() error {
 
 // DrawScoreBoard prints the current games to the scoreboard view
 func (nba *NBAConsole) DrawScoreBoard(width int) {
-	if len(nba.gamesList.Items) > 0 {
+	if len(nba.gamesList.Games) > 0 {
 		fmt.Fprintln(nba.scoreboard, formatScoreBoardHeader(width-2))
 		fmt.Fprintln(nba.scoreboard, pad.Left(fmt.Sprint("-"), nba.curW-1, "-"))
-		for _, g := range nba.gamesList.Items {
-			fmt.Fprintln(nba.scoreboard, g.Msg)
+		for _, g := range nba.gamesList.Games {
+			fmt.Fprintln(nba.scoreboard, g)
 		}
 		return
 	}
 	fmt.Fprintf(nba.scoreboard, "No hoops today, %s\n", nba.message)
-	return
 }
 
 func formatScoreBoardHeader(width int) string {
@@ -79,18 +76,21 @@ func formatScoreBoardHeader(width int) string {
 	return str.String()
 }
 
-func (nba *NBAConsole) setGames(sb api.DataScoreboard) error {
+func (nba *NBAConsole) drawScoreboard(sb api.DataScoreboard, width int) error {
+	nba.gamesList.Wipe()
+	fmt.Fprintln(nba.scoreboard, formatScoreBoardHeader(width))
 	for _, gm := range sb.Games {
 		var blob strings.Builder
 		hScore, vScore := gm.Score()
-		blob.WriteString(pad.Left(gm.VTeam.TriCode, 5, " ")) // TODO: fix hardcoding
+		blob.WriteString(pad.Left(gm.VTeam.TriCode, 5, " "))
 		blob.WriteString(pad.Left(gm.HTeam.TriCode, 7, " "))
 		blob.WriteString(pad.Left(fmt.Sprintf("%s - %s", vScore, hScore), blob.Len(), " "))
 		blob.WriteString(pad.Left(gm.Status(), 8, " "))
 		if gm.Playoffs.RoundNum != "" {
-			blob.WriteString(fmt.Sprintf("%s", pad.Left(gm.Playoffs.SeriesSummaryText, 6, " ")))
+			blob.WriteString(pad.Left(gm.Playoffs.SeriesSummaryText, 6, " "))
 		}
-		nba.gamesList.Items = append(nba.gamesList.Items, &GameScore{Msg: blob.String(), ID: gm.GameID})
+		fmt.Fprintln(nba.scoreboard, blob.String())
+		nba.gamesList.Games = append(nba.gamesList.Games, gm.GameID)
 	}
 	nba.gamesList.CurrentIndex = 0
 	return nil

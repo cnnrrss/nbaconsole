@@ -10,30 +10,98 @@ func (bs *GameBoxScore) PointsLeaders() string {
 
 	if bs != nil {
 		home, away := bs.SportsContent.Game.Home, bs.SportsContent.Game.Visitor
-		str.WriteString(
-			fmt.Sprintf("%s %s %s\n",
-				home.Leaders.Points.Leader[0].FirstName,
-				home.Leaders.Points.Leader[0].LastName,
-				home.Leaders.Points.StatValue,
-			))
-		str.WriteString(
-			fmt.Sprintf("%s %s %s\n",
-				away.Leaders.Points.Leader[0].FirstName,
-				away.Leaders.Points.Leader[0].LastName,
-				away.Leaders.Points.StatValue,
-			))
+		if len(home.Leaders.Points.Leader) > 0 {
+			str.WriteString(
+				fmt.Sprintf("%s : %s %s %s pts\n",
+					home.Abbreviation,
+					home.Leaders.Points.Leader[0].FirstName,
+					home.Leaders.Points.Leader[0].LastName,
+					home.Leaders.Points.StatValue,
+				))
+		} else {
+			str.WriteString(fmt.Sprintf("no points leaders for %s\n", home.Abbreviation))
+		}
+		if len(home.Leaders.Points.Leader) > 0 {
+			str.WriteString(
+				fmt.Sprintf("%s : %s %s %s pts\n",
+					away.Abbreviation,
+					away.Leaders.Points.Leader[0].FirstName,
+					away.Leaders.Points.Leader[0].LastName,
+					away.Leaders.Points.StatValue,
+				))
+		} else {
+			str.WriteString(fmt.Sprintf("no points leaders for %s\n", away.Abbreviation))
+		}
 	} else {
 		str.WriteString("errrr getting points leaders")
 	}
 	return str.String()
 }
 
-func (bs *GameBoxScore) AssistsLeaders() {
-	return
+func (bs *GameBoxScore) AssistsLeaders() string {
+	var str strings.Builder
+
+	if bs != nil {
+		home, away := bs.SportsContent.Game.Home, bs.SportsContent.Game.Visitor
+		if len(home.Leaders.Assists.Leader) > 0 {
+			str.WriteString(
+				fmt.Sprintf("%s : %s %s %s assists\n",
+					home.Abbreviation,
+					home.Leaders.Assists.Leader[0].FirstName,
+					home.Leaders.Assists.Leader[0].LastName,
+					home.Leaders.Assists.StatValue,
+				))
+		} else {
+			str.WriteString(fmt.Sprintf("no assists leaders for %s\n", home.Abbreviation))
+		}
+		if len(home.Leaders.Points.Leader) > 0 {
+			str.WriteString(
+				fmt.Sprintf("%s : %s %s %s assists\n",
+					away.Abbreviation,
+					away.Leaders.Assists.Leader[0].FirstName,
+					away.Leaders.Assists.Leader[0].LastName,
+					away.Leaders.Assists.StatValue,
+				))
+		} else {
+			str.WriteString(fmt.Sprintf("no assists leaders for %s\n", away.Abbreviation))
+		}
+	} else {
+		str.WriteString("errrr getting assists leaders")
+	}
+	return str.String()
 }
 
-func (bs *GameBoxScore) ReboundsLeaders() {
-	return
+func (bs *GameBoxScore) ReboundsLeaders() string {
+	var str strings.Builder
+
+	if bs != nil {
+		home, away := bs.SportsContent.Game.Home, bs.SportsContent.Game.Visitor
+		if len(home.Leaders.Rebounds.Leader) > 0 {
+			str.WriteString(
+				fmt.Sprintf("%s : %s %s %s rebs\n",
+					home.Abbreviation,
+					home.Leaders.Rebounds.Leader[0].FirstName,
+					home.Leaders.Rebounds.Leader[0].LastName,
+					home.Leaders.Rebounds.StatValue,
+				))
+		} else {
+			str.WriteString(fmt.Sprintf("no rebounds leaders for %s\n", home.Abbreviation))
+		}
+		if len(home.Leaders.Points.Leader) > 0 {
+			str.WriteString(
+				fmt.Sprintf("%s : %s %s %s rebs\n",
+					away.Abbreviation,
+					away.Leaders.Rebounds.Leader[0].FirstName,
+					away.Leaders.Rebounds.Leader[0].LastName,
+					away.Leaders.Rebounds.StatValue,
+				))
+		} else {
+			str.WriteString(fmt.Sprintf("no rebounds leaders for %s\n", away.Abbreviation))
+		}
+	} else {
+		str.WriteString("errrr getting rebounds leaders")
+	}
+	return str.String()
 }
 
 type GameBoxScore struct {

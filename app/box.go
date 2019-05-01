@@ -17,16 +17,14 @@ type Page struct {
 // Box extends gocui.View with game specific info
 type Box struct {
 	*gocui.View  // inline a gocui View
-	Title        string
-	Items        []*GameScore
+	Games        []string
 	Pages        []Page
 	CurrentIndex int
 	Ordered      bool
 }
 
 type GameScore struct {
-	Msg string
-	ID  string
+	ID string
 }
 
 // NewBox initializes a Box object with an existing gocui.View
@@ -43,7 +41,7 @@ func NewBox(v *gocui.View, ordered bool) *Box {
 
 // Wipe wipes a box from the terminal
 func (b *Box) Wipe() {
-	b.Items = make([]*GameScore, 0)
+	b.Games = make([]string, 0)
 	b.Pages = []Page{}
 	b.Clear()
 	b.SetCursor(0, 0)
@@ -51,7 +49,7 @@ func (b *Box) Wipe() {
 
 // IsEmpty indicates whether a Box has any items
 func (b *Box) IsEmpty() bool {
-	return len(b.Items) == 0
+	return len(b.Games) == 0
 }
 
 // SetHeader will set the title of the View and display paging information of the
@@ -104,9 +102,8 @@ func (b *Box) displayBox(bi int) error {
 	return nil
 }
 
-// displayBoxItem ...
 func (b *Box) displayBoxItem(i int) string {
-	item := fmt.Sprint(b.Items[i])
+	item := fmt.Sprint(b.Games[i])
 	x, _ := b.Size()
 	sp := addSpaces(x - 1 - len(item) - 3)
 	if b.Ordered {

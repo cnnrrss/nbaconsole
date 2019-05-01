@@ -1,14 +1,12 @@
 package app
 
 import (
-	"fmt"
-
 	"github.com/jroimartin/gocui"
 	log "github.com/sirupsen/logrus"
 )
 
 // refresh reads from the rateLimiter channel
-// and writed to the forceRefresh Channel
+// and write to the forceRefresh Channel
 func (nba *NBAConsole) refresh() error {
 	go func() {
 		<-nba.rateLimiter
@@ -38,8 +36,10 @@ func (nba *NBAConsole) pollScoreboardData() {
 			select {
 			case <-nba.forceRefresh:
 				nba.refreshScoreboardView()
+				go nba.updateFooter("")
 			case <-nba.refreshTicker.C:
 				nba.refreshScoreboardView()
+				go nba.updateFooter("")
 			}
 		}
 	}()
@@ -49,8 +49,6 @@ func (nba *NBAConsole) pollScoreboardData() {
 // scoreboard and make a get request to refresh the latest data
 func (nba *NBAConsole) refreshScoreboardView() error {
 	go func() {
-		fmt.Fprintf(nba.scoreboard, "refreshing...")
-		nba.scoreboard.Clear()
 		nba.getScoreboard()
 	}()
 	return nil
