@@ -53,20 +53,10 @@ type Game struct {
 	IsBuzzerBeater        bool      `json:"isBuzzerBeater"`
 	IsPreviewArticleAvail bool      `json:"isPreviewArticleAvail"`
 	IsRecapArticleAvail   bool      `json:"isRecapArticleAvail"`
-	Tickets               struct {
-		MobileApp    string `json:"mobileApp"`
-		DesktopWeb   string `json:"desktopWeb"`
-		MobileWeb    string `json:"mobileWeb"`
-		LeagGameInfo string `json:"leagGameInfo"`
-		LeagTix      string `json:"leagTix"`
-	} `json:"tickets"`
-	HasGameBookPdf bool `json:"hasGameBookPdf"`
-	IsStartTimeTBD bool `json:"isStartTimeTBD"`
-	Nugget         struct {
-		Text string `json:"text"`
-	} `json:"nugget"`
-	Attendance   string `json:"attendance"`
-	GameDuration struct {
+	HasGameBookPdf        bool      `json:"hasGameBookPdf"`
+	IsStartTimeTBD        bool      `json:"isStartTimeTBD"`
+	Nugget                Nugget    `json:"nugget"`
+	GameDuration          struct {
 		Hours   string `json:"hours"`
 		Minutes string `json:"minutes"`
 	} `json:"gameDuration"`
@@ -90,35 +80,152 @@ type Game struct {
 			IsSeriesWinner bool   `json:"isSeriesWinner"`
 		} `json:"hTeam"`
 	} `json:"playoffs"`
-	Period struct {
-		Current       int  `json:"current"`
-		Type          int  `json:"type"`
-		MaxRegular    int  `json:"maxRegular"`
-		IsHalftime    bool `json:"isHalftime"`
-		IsEndOfPeriod bool `json:"isEndOfPeriod"`
-	} `json:"period"`
-	VTeam struct {
-		TeamID     string `json:"teamId"`
-		TriCode    string `json:"triCode"`
-		Win        string `json:"win"`
-		Loss       string `json:"loss"`
-		SeriesWin  string `json:"seriesWin"`
-		SeriesLoss string `json:"seriesLoss"`
-		Score      string `json:"score"`
-		Linescore  []struct {
-			Score string `json:"score"`
-		} `json:"linescore"`
-	} `json:"vTeam"`
-	HTeam struct {
-		TeamID     string `json:"teamId"`
-		TriCode    string `json:"triCode"`
-		Win        string `json:"win"`
-		Loss       string `json:"loss"`
-		SeriesWin  string `json:"seriesWin"`
-		SeriesLoss string `json:"seriesLoss"`
-		Score      string `json:"score"`
-		Linescore  []struct {
-			Score string `json:"score"`
-		} `json:"linescore"`
-	} `json:"hTeam"`
+	Period Period `json:"period"`
+	HTeam  Team   `json:"hTeam"`
+	VTeam  Team   `json:"vTeam"`
+}
+type Nugget struct {
+	Text string `json:"text"`
+}
+
+type Period struct {
+	Current       int  `json:"current"`
+	Type          int  `json:"type"`
+	MaxRegular    int  `json:"maxRegular"`
+	IsHalftime    bool `json:"isHalftime"`
+	IsEndOfPeriod bool `json:"isEndOfPeriod"`
+}
+type Team struct {
+	TeamID     string `json:"teamId"`
+	TriCode    string `json:"triCode"`
+	Win        string `json:"win"`
+	Loss       string `json:"loss"`
+	SeriesWin  string `json:"seriesWin"`
+	SeriesLoss string `json:"seriesLoss"`
+	Score      string `json:"score"`
+	Linescore  []struct {
+		Score string `json:"score"`
+	} `json:"linescore"`
+}
+
+func DummyDataScoreboard() DataScoreboard {
+	return DataScoreboard{
+		Games: []Game{
+			Game{
+				GameID: "111111",
+				Nugget: Nugget{
+					Text: "Curry 30pts 10/10 3pts",
+				},
+				VTeam: Team{
+					TriCode: "GSW",
+					Score:   "110",
+				},
+				HTeam: Team{
+					TriCode: "LAC",
+					Score:   "89",
+				},
+				Period: Period{
+					Current: 4,
+				},
+				IsGameActivated: true,
+				StatusNum:       3,
+			},
+			Game{
+				GameID: "111112",
+				Nugget: Nugget{
+					Text: "Booker 77 pts",
+				},
+				VTeam: Team{
+					TriCode: "PHX",
+					Score:   "77",
+				},
+				HTeam: Team{
+					TriCode: "LAL",
+					Score:   "150",
+				},
+				Period: Period{
+					Current: 4,
+				},
+				IsGameActivated: true,
+				StatusNum:       3,
+			},
+			Game{
+				GameID: "222222",
+				Nugget: Nugget{
+					Text: "Harden 110 pts",
+				},
+				VTeam: Team{
+					TriCode: "HOU",
+					Score:   "110",
+				},
+				HTeam: Team{
+					TriCode: "BKN",
+					Score:   "121",
+				},
+				Period: Period{
+					Current: 4,
+				},
+				IsGameActivated: true,
+				StatusNum:       3,
+			},
+			Game{
+				GameID: "3331112",
+				Nugget: Nugget{
+					Text: "Lowry 0/11 3pts",
+				},
+				VTeam: Team{
+					TriCode: "TOR",
+					Score:   "58",
+				},
+				HTeam: Team{
+					TriCode: "BOS",
+					Score:   "43",
+				},
+				StatusNum: 2,
+				Period: Period{
+					Current: 2,
+				},
+				Clock:           "3:01",
+				IsGameActivated: true,
+			},
+			Game{
+				GameID: "1442112",
+				Nugget: Nugget{
+					Text: "",
+				},
+				VTeam: Team{
+					TriCode: "NYK",
+					Score:   "3",
+				},
+				HTeam: Team{
+					TriCode: "CHA",
+					Score:   "10",
+				},
+				StatusNum: 2,
+				Period: Period{
+					Current: 1,
+				},
+				Clock:           "11:53",
+				IsGameActivated: true,
+			},
+			Game{
+				GameID: "00999912",
+				Nugget: Nugget{
+					Text: "",
+				},
+				VTeam: Team{
+					TriCode: "NOP",
+				},
+				HTeam: Team{
+					TriCode: "CLE",
+				},
+				StatusNum: 0,
+				Period: Period{
+					Current: 0,
+				},
+				StartTimeEastern: "Wednesday",
+				IsGameActivated:  false,
+			},
+		},
+	}
 }

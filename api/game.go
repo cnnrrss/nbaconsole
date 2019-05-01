@@ -26,7 +26,7 @@ func (g *Game) HasStarted() bool {
 func (g *Game) Status() string {
 	currTime := time.Now().UTC()
 	if g.IsGameActivated {
-		return fmt.Sprintf("Q%d %s", g.Period.Current, g.Clock)
+		return fmt.Sprintf("%s Q%d", g.Clock, g.Period.Current)
 	} else if g.StatusNum == 3 && g.StartTimeUTC.Before(currTime) {
 		return "Final"
 	}
