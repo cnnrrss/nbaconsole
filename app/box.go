@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 
+	"github.com/cnnrrss/nbaconsole/api"
 	"github.com/cnnrrss/nbaconsole/common/pad"
 	"github.com/jroimartin/gocui"
 )
@@ -24,7 +25,8 @@ type Box struct {
 }
 
 type GameScore struct {
-	ID string
+	api.GameBoxScore // inline api methods
+	ID               string
 }
 
 // NewBox initializes a Box object with an existing gocui.View

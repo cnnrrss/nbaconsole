@@ -35,7 +35,6 @@ func (nba *NBAConsole) SelectedGame() string {
 // HighlightedRowIndex returns the index of the highlighted row
 func (nba *NBAConsole) HighlightedRowIndex() int {
 	_, idx := nba.scoreboard.Origin()
-
 	if idx < 0 {
 		idx = 0
 	}
@@ -46,8 +45,6 @@ func (nba *NBAConsole) HighlightedRowIndex() int {
 }
 
 func (nba *NBAConsole) getBoxScore() error {
-	_, curH := nba.g.Size()
-
 	params := genericParams(nba.date)
 	if nba.selectedGame == "" {
 		nba.debuglog("error nba selected game nil")
@@ -69,13 +66,18 @@ func (nba *NBAConsole) getBoxScore() error {
 		nba.debuglog(fmt.Sprintf("err unmarshalling %v\n", err.Error()))
 	}
 
+	nba.selectedGameScore = &GameScore{
+		boxScore, // todo
+		nba.selectedGame,
+	} // cache results
 	nba.g.SetCurrentView("boxScore")
 
 	nba.update(func() {
 		nba.boxScore.Clear()
-		fmt.Fprintln(nba.boxScore, boxScore.PointsLeaders())
+		fmt.Fprintln(nba.boxScore, boxScore.PointsLeaders()) // TODO
 		fmt.Fprintln(nba.boxScore, boxScore.AssistsLeaders())
 		fmt.Fprintln(nba.boxScore, boxScore.ReboundsLeaders())
+		_, curH := nba.g.Size()
 		nba.boxScore.SetCursor(0, curH-2)
 		nba.boxScore.Highlight = true
 		nba.boxScore.SelFgColor = gocui.ColorBlue

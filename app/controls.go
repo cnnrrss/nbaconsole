@@ -14,10 +14,6 @@ func (nba *NBAConsole) keybindings(g *gocui.Gui) error {
 		return err
 	}
 
-	if err := g.SetKeybinding("", gocui.KeyEnter, gocui.ModNone, nil); err != nil {
-		return err
-	}
-
 	if err := g.SetKeybinding("", gocui.KeyCtrlC, gocui.ModNone, quit); err != nil {
 		return err
 	}
@@ -27,6 +23,15 @@ func (nba *NBAConsole) keybindings(g *gocui.Gui) error {
 	}
 
 	if err := g.SetKeybinding(scoreboardLabel, gocui.KeyEnter, gocui.ModNone, nba.keyfn(nba.ToggleGameBoxScore)); err != nil {
+		return err
+	}
+
+	if err := g.SetKeybinding(scoreboardLabel, gocui.KeyCtrlT, gocui.ModNone, nba.keyfn(nba.ToggleTeamStats)); err != nil {
+		return err
+	}
+
+	// TODO:
+	if err := g.SetKeybinding("teamstats", gocui.KeyEnter, gocui.ModNone, nba.keyfn(nba.getScoreboard)); err != nil {
 		return err
 	}
 

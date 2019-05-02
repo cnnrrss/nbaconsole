@@ -21,6 +21,8 @@ var (
 // getScoreboard locks the current scoreBoard view and requests new data from
 // the NBA API. If the data is received, the scoreBoard view is written to stdout
 func (nba *NBAConsole) getScoreboard() error {
+	nba.debuglog("getScoreboard")
+	nba.g.SetCurrentView(scoreboardLabel)
 
 	params := genericParams(nba.date)
 	resp, err := api.GetDataScoreBoard(params)

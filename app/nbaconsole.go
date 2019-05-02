@@ -11,24 +11,29 @@ import (
 // NBAConsole provides the context for running the app
 type NBAConsole struct {
 	// gocui User Interface
+	// TODO: unwrap maybe?
 	g *gocui.Gui
 
-	// Views
+	// Views TODO: make array or map?
 	footerView *gocui.View
 	scoreboard *gocui.View
 	boxScore   *gocui.View
+	teamStats  *gocui.View
 	helpView   *gocui.View
 
 	// refresh ticker
+	// TODO: implement done and rate limiting
 	refreshTicker *time.Ticker
 	rateLimiter   <-chan time.Time
 	lastUpdated   time.Time
 	forceRefresh  chan bool
 	done          chan bool
 
+	// TODO: implement caching
 	// stateful nba game data
-	selectedGame string
-	gamesList    *Box
+	selectedGame      string
+	selectedGameScore *GameScore
+	gamesList         *Box
 
 	// additional console state
 	message string

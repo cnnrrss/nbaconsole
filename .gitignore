@@ -8,6 +8,10 @@
 *.o
 *.so
 
+# Go #
+######
+cover*
+
 # Packages #
 ############
 # it's better to unpack these files and commit the raw source
@@ -37,17 +41,17 @@
 ehthumbs.db
 Thumbs.db
 
-# builds
+# Builds #
+##########
 build
 dist
 bin
 main
 !main.go
 
-# editors and others #
-##########
+# Editors and more #
+####################
 encodé.jade
-hbpower
 .idea
 .iml
 .vscode
