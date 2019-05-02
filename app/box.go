@@ -1,9 +1,9 @@
 package app
 
 import (
-	"bytes"
 	"fmt"
 
+	"github.com/cnnrrss/nbaconsole/common/pad"
 	"github.com/jroimartin/gocui"
 )
 
@@ -105,17 +105,9 @@ func (b *Box) displayBox(bi int) error {
 func (b *Box) displayBoxItem(i int) string {
 	item := fmt.Sprint(b.Games[i])
 	x, _ := b.Size()
-	sp := addSpaces(x - 1 - len(item) - 3)
+	sp := pad.AddSpaces(x - 1 - len(item) - 3)
 	if b.Ordered {
 		return fmt.Sprintf(">>>>%2d. %v%v", i+1, item, sp)
 	}
 	return fmt.Sprintf(">>> %v%v", item, sp)
-}
-
-func addSpaces(n int) string {
-	var s bytes.Buffer
-	for i := 0; i < n; i++ {
-		s.WriteString(" ")
-	}
-	return s.String()
 }

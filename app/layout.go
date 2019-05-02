@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 
+	"github.com/cnnrrss/nbaconsole/common/pad"
 	"github.com/jroimartin/gocui"
 )
 
@@ -64,7 +65,7 @@ func (nba *NBAConsole) setHeaderView(g *gocui.Gui) error {
 		v.Frame = true
 		v.Title = headerLabel
 		dateString := toHumanDate(nba.date)
-		fmt.Fprintf(v, fmt.Sprintf(" %s%s%s\n", globalLayout, addSpaces(4), dateString))
+		fmt.Fprintf(v, fmt.Sprintf(" %s%s%s\n", globalLayout, pad.AddSpaces(4), dateString))
 	}
 	return nil
 }

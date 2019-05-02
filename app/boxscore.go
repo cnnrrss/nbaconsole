@@ -63,6 +63,7 @@ func (nba *NBAConsole) getBoxScore() error {
 		return fmt.Errorf("Error reading request body %v", err)
 	}
 
+	nba.debuglog("resp:\n" + string(body) + "\n")
 	boxScore := api.GameBoxScore{}
 	if err := json.Unmarshal(body, &boxScore); err != nil {
 		nba.debuglog(fmt.Sprintf("err unmarshalling %v\n", err.Error()))
