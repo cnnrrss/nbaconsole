@@ -7,10 +7,11 @@ import (
 	"github.com/cnnrrss/nbaconsole/app"
 )
 
-var gameDate string
+var gameDate, timeZone string
 
 func init() {
 	flag.StringVar(&gameDate, "d", "", "optionally retrieve NBA scoreboard for date in YYYYMMDD format")
+	flag.StringVar(&timeZone, "tz", "America/Los_Angles", "optionally set time zone")
 }
 
 func main() {
@@ -19,6 +20,6 @@ func main() {
 	if os.Getenv("DEBUG") != "" {
 		debug = true
 	}
-	nba := app.NewNBAConsole(gameDate, debug)
+	nba := app.NewNBAConsole(gameDate, timeZone, debug)
 	nba.Start()
 }

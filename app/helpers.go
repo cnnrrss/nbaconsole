@@ -20,7 +20,6 @@ var (
 	}
 )
 
-// genericParams returns basic parameters to include in an API request
 func genericParams(date string) map[string]string {
 	params := map[string]string{
 		"DayOffset": "0",
@@ -30,9 +29,8 @@ func genericParams(date string) map[string]string {
 	return params
 }
 
-// currentDate returns the current unix time date in YYYYMMDD format
-func currentDate() string {
-	loc, _ := time.LoadLocation("America/Los_Angeles")
+func currentDateYYYYMMDD(tz string) string {
+	loc, _ := time.LoadLocation(tz)
 	return time.Now().In(loc).AddDate(0, 0, 0).Format(YYYYMMDD)
 }
 

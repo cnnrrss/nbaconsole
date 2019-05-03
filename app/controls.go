@@ -6,6 +6,7 @@ import (
 
 func (nba *NBAConsole) keybindings(g *gocui.Gui) error {
 	var err error
+
 	if err = g.SetKeybinding("", gocui.KeyArrowUp, gocui.ModNone, MoveUp); err != nil {
 		return err
 	}
@@ -30,10 +31,22 @@ func (nba *NBAConsole) keybindings(g *gocui.Gui) error {
 		return err
 	}
 
-	// TODO:
-	if err := g.SetKeybinding("teamstats", gocui.KeyEnter, gocui.ModNone, nba.keyfn(nba.getScoreboard)); err != nil {
+	if err := g.SetKeybinding(boxScoreLabel, gocui.KeyBackspace, gocui.ModNone, nba.keyfn(nba.getScoreboard)); err != nil {
 		return err
 	}
+
+	if err := g.SetKeybinding(boxScoreLabel, gocui.KeyBackspace2, gocui.ModNone, nba.keyfn(nba.getScoreboard)); err != nil {
+		return err
+	}
+
+	// TODO: doesn't work :(
+	// if err := g.SetKeybinding(teamStatsLabel, gocui.KeyBackspace, gocui.ModNone, nba.keyfn(nba.getScoreboard)); err != nil {
+	// 	return err
+	// }
+
+	// if err := g.SetKeybinding(teamStatsLabel, gocui.KeyBackspace2, gocui.ModNone, nba.keyfn(nba.getScoreboard)); err != nil {
+	// 	return err
+	// }
 
 	return nil
 }

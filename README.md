@@ -14,7 +14,8 @@ A minimal NBA scoreboard presented in the terminal using gocui
 
 ```bash
 ./bin/nbaconsole \
--d <YYYYMMDD> # (optional date flag)
+-d <YYYYMMDD> \ # optional: date flag
+-tz <Timezone>  # optional: timezone flag
 ```
 
 ### Controls
@@ -39,4 +40,4 @@ BoxScore|`Ctrl+t`|View team stats for currently selected games' boxscore|
 
 
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/connorvanderhook/nbaconsole?style=flat-square)](https://goreportcard.com/report/github.com/connorvanderhook/nbaconsole)
+[![Go Report Card](https://goreportcard.com/badge/github.com/cnnrrss/nbaconsole?style=flat-square)](https://goreportcard.com/report/github.com/cnnrrss/nbaconsole)

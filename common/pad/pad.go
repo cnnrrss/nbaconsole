@@ -1,6 +1,8 @@
 package pad
 
-import "bytes"
+import (
+	"strings"
+)
 
 func times(str string, n int) (out string) {
 	for i := 0; i < n; i++ {
@@ -19,10 +21,10 @@ func Right(str string, length int, pad string) string {
 	return str + times(pad, length-len(str))
 }
 
-func AddSpaces(n int) string {
-	var s bytes.Buffer
+func AddString(n int, s string) string {
+	var str strings.Builder
 	for i := 0; i < n; i++ {
-		s.WriteString(" ")
+		str.WriteString(s)
 	}
-	return s.String()
+	return str.String()
 }

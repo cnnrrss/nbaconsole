@@ -29,10 +29,9 @@ type NBAConsole struct {
 	forceRefresh  chan bool
 	done          chan bool
 
-	// TODO: implement caching
 	// stateful nba game data
 	selectedGame      string
-	selectedGameScore *GameScore
+	selectedGameScore *GameScore // TODO: implement caching
 	gamesList         *Box
 
 	// additional console state
@@ -44,9 +43,9 @@ type NBAConsole struct {
 }
 
 // NewNBAConsole loads a new context for running the app
-func NewNBAConsole(date string, debug bool) *NBAConsole {
+func NewNBAConsole(date, tz string, debug bool) *NBAConsole {
 	if date == "" {
-		date = currentDate()
+		date = currentDateYYYYMMDD(tz)
 	}
 
 	return &NBAConsole{

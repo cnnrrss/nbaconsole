@@ -10,7 +10,6 @@ import (
 
 	"github.com/cnnrrss/nbaconsole/api"
 	"github.com/cnnrrss/nbaconsole/common/pad"
-	"github.com/jroimartin/gocui"
 )
 
 var (
@@ -21,7 +20,6 @@ var (
 // getScoreboard locks the current scoreBoard view and requests new data from
 // the NBA API. If the data is received, the scoreBoard view is written to stdout
 func (nba *NBAConsole) getScoreboard() error {
-	nba.debuglog("getScoreboard")
 	nba.g.SetCurrentView(scoreboardLabel)
 
 	params := genericParams(nba.date)
@@ -43,31 +41,13 @@ func (nba *NBAConsole) getScoreboard() error {
 		curW, _ := nba.g.Size()
 		nba.scoreboard.Clear()
 		nba.drawScoreboard(nba.scoreboard, sb, curW)
-		_, y := nba.scoreboard.Cursor()
-		nba.scoreboard.SetCursor(0, y+2)
-		nba.scoreboard.Highlight = true
-		nba.scoreboard.SelFgColor = gocui.ColorBlue
-		nba.scoreboard.SelBgColor = gocui.ColorDefault
 	})
 	scoreBoard.Unlock()
 
 	return nil
 }
 
-func formatScoreBoardHeader(width int) string {
-	var str strings.Builder
-	for i, h := range scoreBoardHeaders {
-		switch {
-		case i < len(scoreBoardHeaders)-1:
-			str.WriteString(pad.Left(h, 6+(1*i), " "))
-		default:
-			str.WriteString(pad.Left(h, 17, " "))
-		}
-	}
-	return str.String()
-}
-
-func (nba *NBAConsole) drawScoreboard(output io.Writer, sb api.DataScoreboard, width int) error {
+func (nba *NBAConsole) drawScoreboard(output io.Writer, sb api.DataScoreboard, width int) {
 	nba.gamesList.Wipe()
 	fmt.Fprintln(output, formatScoreBoardHeader(width))
 
@@ -82,13 +62,35 @@ func (nba *NBAConsole) drawScoreboard(output io.Writer, sb api.DataScoreboard, w
 			blob.WriteString(pad.Left(gm.Playoffs.SeriesSummaryText, 6, " "))
 		}
 		fmt.Fprintln(output, blob.String())
-		nba.gamesList.Games = append(nba.gamesList.Games, gm.GameID)
+		nba.gamesList.games = append(nba.gamesList.games, gm.GameID)
 	}
-	if len(nba.gamesList.Games) == 0 {
+	if len(nba.gamesList.games) == 0 {
 		fmt.Fprintf(output, "No hoops today, %s\n", nba.message)
 	}
 
-	nba.gamesList.CurrentIndex = 0
+	nba.gamesList.currentIdx = 0 // TODO: implement?
 
-	return nil
+	nba.scoreboard.SetOrigin(0, 0)
+	nba.scoreboard.SetCursor(0, 2)
+
+	highlightView(nba.scoreboard)
+}
+
+func formatScoreBoardHeader(width int) string {
+	var str strings.Builder
+
+	// TODO: this sucks
+	for i, h := range scoreBoardHeaders {
+		switch {
+		case i < len(scoreBoardHeaders)-1:
+			str.WriteString(pad.Left(h, 6+(1*i), " "))
+		default:
+			str.WriteString(pad.Left(h, 17, " "))
+		}
+	}
+
+	length := str.Len()
+	str.WriteString(fmt.Sprintf("\n%s", pad.AddString(length, "-")))
+
+	return str.String()
 }

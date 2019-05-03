@@ -15,11 +15,11 @@ func (nba *NBAConsole) ToggleTeamStats() error {
 
 	go nba.setTeamStatsView(nba.g, nba.selectedGame)
 
-	return nil // TODO: handle errors gracefully
+	return nil
 }
 
 func (nba *NBAConsole) setTeamStatsView(g *gocui.Gui, gameID string) error {
-	if v, err := g.SetView("teamstats", globalX0, scoreboardY0, nba.curW-1, nba.curH-footerHeight-footerHeight); err != nil {
+	if v, err := g.SetView(teamStatsLabel, globalX0, scoreboardY0, nba.curW-1, nba.curH-footerHeight-footerHeight); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
@@ -34,12 +34,10 @@ func (nba *NBAConsole) setTeamStatsView(g *gocui.Gui, gameID string) error {
 }
 
 func (nba *NBAConsole) setTeamStats() error {
-	nba.g.SetCurrentView("teamstats")
+	nba.g.SetCurrentView(teamStatsLabel)
 	nba.update(func() {
 		nba.teamStats.Clear()
 		fmt.Fprintln(nba.teamStats, nba.selectedGameScore.TeamStats())
-		_, curH := nba.g.Size()
-		nba.boxScore.SetCursor(0, curH-2)
 	})
 	return nil
 }

@@ -8,17 +8,25 @@ import (
 )
 
 var (
-	quitText = "Quit"
+	versionText     string = "Version:"
+	quitText        string = "Quit: [Q]"
+	lastUpdatedText string = "Last Updated:"
+	toggleBoxScoreText string = "BoxScoreView: [Ctrl+t]"
 )
 
 func (nba *NBAConsole) updateFooter(s string) {
 	nba.update(func() {
 		nba.footerView.Clear()
-		base := fmt.Sprintf("%s: [Q]", quitText)
-		v := fmt.Sprintf(" Version: [%s]", nba.version())
-		str := pad.Left(base, 8, " ")
 		nba.lastUpdated = time.Now()
-		upd := fmt.Sprintf("Last Updated: [%s]", toHumanTime(nba.lastUpdated))
-		fmt.Fprintln(nba.footerView, fmt.Sprintf("%s %s %s", v, str, upd))
+		fmt.Fprintln(nba.footerView,
+			fmt.Sprintf("%s [%s] %s %s %s %s",
+				versionText,
+				nba.version(),
+				pad.Left(quitText, 8, " "),
+				lastUpdatedText,
+				toHumanTime(nba.lastUpdated),
+				toggleBoxScoreText,
+			),
+		)
 	})
 }
