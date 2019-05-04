@@ -1,21 +1,16 @@
 package app
 
 import (
-	"bytes"
 	"fmt"
 	"testing"
 
 	"github.com/cnnrrss/nbaconsole/api"
 )
 
-func Test__setGames(t *testing.T) {
-	console := &NBAConsole{
-		gamesList: &Box{},
+func Test__formatGame(t *testing.T) {
+	//fmt.Println("Home       Score	     Away	      Status")
+	sb := api.DummyDataScoreboard()
+	for _, gm := range sb.Games {
+		fmt.Printf(formatGame(gm))
 	}
-
-	scoreboard := api.DummyDataScoreboard()
-	console.setGames(scoreboard)
-	buf := bytes.NewBuffer([]byte{})
-	console.DrawScoreBoard(buf, 120)
-	fmt.Println(buf.String())
 }

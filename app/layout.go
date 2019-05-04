@@ -4,22 +4,16 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/cnnrrss/nbaconsole/common/pad"
 	"github.com/jroimartin/gocui"
 )
 
 var (
-	globalLayout = "Welcome to NBA Console"
-
 	globalX0 = 1
 
-	headerLabel  = "NBA Console"
-	headerY0     = 0
-	headerHeight = 2
-	headerY1     = headerY0 + headerHeight
+	headerLabel = "NBA Console"
 
 	scoreboardLabel = "scoreboard"
-	scoreboardY0    = headerY1 + 1
+	scoreboardY0    = 1
 
 	boxScoreLabel  = "boxscore"
 	teamStatsLabel = "teamstats"
@@ -41,7 +35,6 @@ func (nba *NBAConsole) layout(g *gocui.Gui) error {
 		}
 	}
 
-	setMainView(g, nba.setHeaderView)
 	setMainView(g, nba.setScoreboardView)
 	setMainView(g, nba.setFooterView)
 
@@ -50,24 +43,16 @@ func (nba *NBAConsole) layout(g *gocui.Gui) error {
 	return nil
 }
 
-func (nba *NBAConsole) setHeaderView(g *gocui.Gui) error {
-	if v, err := g.SetView(globalLayout, globalX0, headerY0, nba.curW-1, headerY1); err != nil {
-		if err != gocui.ErrUnknownView {
-			return err
-		}
-
-		v.Frame = true
-		dateString := toHumanDate(nba.date)
-		fmt.Fprintf(v, fmt.Sprintf(" %s%s%s\n", globalLayout, pad.AddString(4, " "), dateString))
-	}
-	return nil
-}
-
 func (nba *NBAConsole) setScoreboardView(g *gocui.Gui) error {
-	if v, err := g.SetView(scoreboardLabel, globalX0, scoreboardY0, nba.curW-1, nba.curH-footerHeight-footerHeight); err != nil {
+	if v, err := g.SetView(scoreboardLabel, 0, 0, nba.curW-1, nba.curH-footerHeight-footerHeight); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
+
+		v.Title = fmt.Sprintf(" %-14s%s\n",
+			headerLabel,
+			toHumanDate(nba.date),
+		)
 
 		nba.scoreboard = v
 		highlightView(nba.scoreboard)

@@ -12,14 +12,28 @@ import (
 	"github.com/cnnrrss/nbaconsole/common/pad"
 )
 
+var scoreBoard sync.Mutex
+
 var (
-	scoreBoard        sync.Mutex
-	scoreBoardHeaders = []string{"Home", "Away", "Score", "Status"}
+	scoreBoardHeaderFmt string = "%-11s%-14s%-13s%s\n"
+	noGameScoresMsgFmt  string = "No hoops today, %s\n"
+	gameScoreFmt        string = "%-9s%-3s%2s%4s%11s%15s\n"
 )
+
+func (nba *NBAConsole) ToggleScoreboard() error {
+	// TODO: make better
+	nba.g.DeleteView(teamStatsLabel)
+	nba.g.DeleteView(boxScoreLabel)
+
+	go nba.setScoreboardView(nba.g)
+
+	return nil
+}
 
 // getScoreboard locks the current scoreBoard view and requests new data from
 // the NBA API. If the data is received, the scoreBoard view is written to stdout
 func (nba *NBAConsole) getScoreboard() error {
+	nba.scoreboard.Clear()
 	nba.g.SetCurrentView(scoreboardLabel)
 
 	params := genericParams(nba.date)
@@ -39,7 +53,6 @@ func (nba *NBAConsole) getScoreboard() error {
 	scoreBoard.Lock()
 	nba.update(func() {
 		curW, _ := nba.g.Size()
-		nba.scoreboard.Clear()
 		nba.drawScoreboard(nba.scoreboard, sb, curW)
 	})
 	scoreBoard.Unlock()
@@ -47,28 +60,31 @@ func (nba *NBAConsole) getScoreboard() error {
 	return nil
 }
 
-func (nba *NBAConsole) drawScoreboard(output io.Writer, sb api.DataScoreboard, width int) {
+func (nba *NBAConsole) drawScoreboard(output io.Writer, sb api.DataScoreboard, width int /** TODO */) {
 	nba.gamesList.Wipe()
-	fmt.Fprintln(output, formatScoreBoardHeader(width))
+
+	var blob strings.Builder
+	headerString := fmt.Sprintf(scoreBoardHeaderFmt, "Home", "Score", "Away", "Status")
+	blob.WriteString(headerString)
+	blob.WriteString(
+		fmt.Sprintf("%s\n",
+			pad.AddString(len(headerString)-1, "-"),
+		),
+	)
 
 	for _, gm := range sb.Games {
-		var blob strings.Builder
-		hScore, vScore := gm.Score()
-		blob.WriteString(pad.Left(gm.VTeam.TriCode, 5, " "))
-		blob.WriteString(pad.Left(gm.HTeam.TriCode, 7, " "))
-		blob.WriteString(pad.Left(fmt.Sprintf("%s - %s", vScore, hScore), blob.Len(), " "))
-		blob.WriteString(pad.Left(gm.Status(), 14, " "))
-		if gm.Playoffs.RoundNum != "" {
-			blob.WriteString(pad.Left(gm.Playoffs.SeriesSummaryText, 6, " "))
-		}
-		fmt.Fprintln(output, blob.String())
+		blob.WriteString(formatGame(gm))
 		nba.gamesList.games = append(nba.gamesList.games, gm.GameID)
 	}
+
 	if len(nba.gamesList.games) == 0 {
-		fmt.Fprintf(output, "No hoops today, %s\n", nba.message)
+		blob.WriteString(
+			fmt.Sprintf(noGameScoresMsgFmt,
+				nba.message),
+		)
 	}
 
-	nba.gamesList.currentIdx = 0 // TODO: implement?
+	fmt.Fprintf(output, blob.String())
 
 	nba.scoreboard.SetOrigin(0, 0)
 	nba.scoreboard.SetCursor(0, 2)
@@ -76,21 +92,24 @@ func (nba *NBAConsole) drawScoreboard(output io.Writer, sb api.DataScoreboard, w
 	highlightView(nba.scoreboard)
 }
 
-func formatScoreBoardHeader(width int) string {
-	var str strings.Builder
+func formatGame(gm api.Game) string {
+	var blob strings.Builder
+	hScore, vScore := gm.Score()
+	blob.WriteString(
+		fmt.Sprintf(gameScoreFmt,
+			gm.HTeam.TriCode,
+			hScore,
+			"-",
+			vScore,
+			gm.VTeam.TriCode,
+			gm.Status(),
+		),
+	)
 
-	// TODO: this sucks
-	for i, h := range scoreBoardHeaders {
-		switch {
-		case i < len(scoreBoardHeaders)-1:
-			str.WriteString(pad.Left(h, 6+(1*i), " "))
-		default:
-			str.WriteString(pad.Left(h, 17, " "))
-		}
+	if gm.Playoffs.RoundNum != "" {
+		// TODO: design new fmt
+		blob.WriteString(pad.Left(gm.Playoffs.SeriesSummaryText, 6, " "))
 	}
 
-	length := str.Len()
-	str.WriteString(fmt.Sprintf("\n%s", pad.AddString(length, "-")))
-
-	return str.String()
+	return blob.String()
 }

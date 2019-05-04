@@ -3,29 +3,28 @@ package app
 import (
 	"fmt"
 	"time"
-
-	"github.com/cnnrrss/nbaconsole/common/pad"
 )
 
 var (
-	versionText     string = "Version:"
-	quitText        string = "Quit: [Q]"
-	lastUpdatedText string = "Last Updated:"
-	toggleBoxScoreText string = "BoxScoreView: [Ctrl+t]"
+	footerFmt            string = "v%s  %s  %s  %s  %s[%s]"
+	quitText             string = "Quit[Q]"
+	lastUpdatedText      string = "Updated"
+	toggleBoxScoreText   string = "Stats[Ctrl+t]"
+	toggleScoreBoardText string = "Scores[Ctrl+r]"
 )
 
-func (nba *NBAConsole) updateFooter(s string) {
+func (nba *NBAConsole) updateFooter(s string /** TODO */) {
 	nba.update(func() {
 		nba.footerView.Clear()
 		nba.lastUpdated = time.Now()
 		fmt.Fprintln(nba.footerView,
-			fmt.Sprintf("%s [%s] %s %s %s %s",
-				versionText,
+			fmt.Sprintf(footerFmt,
 				nba.version(),
-				pad.Left(quitText, 8, " "),
+				quitText,
+				toggleBoxScoreText,
+				toggleScoreBoardText,
 				lastUpdatedText,
 				toHumanTime(nba.lastUpdated),
-				toggleBoxScoreText,
 			),
 		)
 	})

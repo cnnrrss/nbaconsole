@@ -53,8 +53,8 @@ func NewNBAConsole(date, tz string, debug bool) *NBAConsole {
 		debug:         debug,
 		message:       nbaMessages[rand.Intn(len(nbaMessages)-1)], // generate random hello
 		forceRefresh:  make(chan bool),
-		refreshTicker: time.NewTicker(20 * time.Second),
-		rateLimiter:   time.Tick(10 * time.Second),
+		refreshTicker: time.NewTicker(30 * time.Second),
+		rateLimiter:   time.Tick(60 * time.Second),
 		lastUpdated:   time.Now(),
 	}
 }

@@ -30,7 +30,10 @@ func genericParams(date string) map[string]string {
 }
 
 func currentDateYYYYMMDD(tz string) string {
-	loc, _ := time.LoadLocation(tz)
+	loc, err := time.LoadLocation(tz)
+	if err != nil {
+		panic(err)
+	}
 	return time.Now().In(loc).AddDate(0, 0, 0).Format(YYYYMMDD)
 }
 

@@ -5,72 +5,68 @@ import (
 	"strings"
 
 	"strconv"
+)
 
-	"github.com/cnnrrss/nbaconsole/common/pad"
+var (
+	lineTeamStatsHeaderFmt = "%-8s%-6s%7s\n"
+	lineShotAttemptsFmt    = "%-9s%-7s%5s\n"
+	lineShotPercentageFmt  = "%-10s%-7s%3s\n"
+	lineReboundStatsFmt    = "%-7d%s%7d\n"
+	lineAssistStatsFmt     = "%-7s%s%7s\n"
+	lineStealStatsFmt      = "%-8s%s%7s\n"
+	lineTurnoverStatsFmt   = "%-6s%-6s%6s\n"
 )
 
 func (bs *GameBoxScore) TeamStats() string {
 	var str strings.Builder
 	if bs != nil {
 		home, away := bs.SportsContent.Game.Home, bs.SportsContent.Game.Visitor
-		str.WriteString(fmt.Sprintf("%s%s%s%s%s\n", home.Abbreviation, pad.AddString(5, " "), "STATS", pad.AddString(5, " "), away.Abbreviation))
 		str.WriteString(
-			fmt.Sprintf("%s/%s%s%s%s%s/%s\n",
-				home.Stats.FieldGoalsMade,
-				home.Stats.FieldGoalsAttempted,
-				pad.AddString(4, " "),
-				"FGs",
-				pad.AddString(4, " "),
-				away.Stats.FieldGoalsMade,
-				away.Stats.FieldGoalsAttempted,
+			fmt.Sprintf(lineTeamStatsHeaderFmt,
+				home.Abbreviation,
+				"STATS",
+				away.Abbreviation,
 			),
 		)
 		str.WriteString(
-			fmt.Sprintf("%s%s%s%s%s\n",
+			fmt.Sprintf(lineShotAttemptsFmt,
+				toFraction(home.Stats.FieldGoalsMade, home.Stats.FieldGoalsAttempted),
+				"FGs",
+				toFraction(away.Stats.FieldGoalsMade, away.Stats.FieldGoalsAttempted),
+			),
+		)
+		str.WriteString(
+			fmt.Sprintf(lineShotPercentageFmt,
 				home.Stats.FieldGoalsPercentage,
-				pad.AddString(6, " "),
 				"%",
-				pad.AddString(6, " "),
 				away.Stats.FieldGoalsPercentage,
 			),
 		)
 		str.WriteString(
-			fmt.Sprintf("%s/%s%s%s%s%s/%s\n",
-				home.Stats.ThreePointersMade,
-				home.Stats.ThreePointersAttempted,
-				pad.AddString(4, " "),
+			fmt.Sprintf(lineShotAttemptsFmt,
+				toFraction(home.Stats.ThreePointersMade, home.Stats.ThreePointersAttempted),
 				"3pts",
-				pad.AddString(4, " "),
-				away.Stats.ThreePointersMade,
-				away.Stats.ThreePointersAttempted,
+				toFraction(away.Stats.ThreePointersMade, away.Stats.ThreePointersAttempted),
 			),
 		)
 		str.WriteString(
-			fmt.Sprintf("%s%s%s%s%s\n",
+			fmt.Sprintf(lineShotPercentageFmt,
 				home.Stats.ThreePointersPercentage,
-				pad.AddString(6, " "),
 				"%",
-				pad.AddString(6, " "),
 				away.Stats.ThreePointersPercentage,
 			),
 		)
 		str.WriteString(
-			fmt.Sprintf("%s/%s%s%s%s%s/%s\n",
-				home.Stats.FreeThrowsMade,
-				home.Stats.FreeThrowsAttempted,
-				pad.AddString(4, " "),
+			fmt.Sprintf(lineShotAttemptsFmt,
+				toFraction(home.Stats.FreeThrowsMade, home.Stats.FreeThrowsAttempted),
 				"FTs",
-				pad.AddString(4, " "),
-				away.Stats.FreeThrowsMade,
-				away.Stats.FreeThrowsAttempted,
+				toFraction(away.Stats.FreeThrowsMade, away.Stats.FreeThrowsAttempted),
 			),
 		)
 		str.WriteString(
-			fmt.Sprintf("%s%s%s%s%s\n",
+			fmt.Sprintf(lineShotPercentageFmt,
 				home.Stats.FreeThrowsPercentage,
-				pad.AddString(6, " "),
 				"%",
-				pad.AddString(6, " "),
 				away.Stats.FreeThrowsPercentage,
 			),
 		)
@@ -79,53 +75,47 @@ func (bs *GameBoxScore) TeamStats() string {
 		homeOffReb, _ := strconv.Atoi(home.Stats.ReboundsOffensive)
 		awayOffReb, _ := strconv.Atoi(away.Stats.ReboundsOffensive)
 		str.WriteString(
-			fmt.Sprintf("%d%s%s%s%d\n",
+			fmt.Sprintf(lineReboundStatsFmt,
 				homeDefReb+homeOffReb,
-				pad.AddString(5, " "),
 				"Tot Reb",
-				pad.AddString(5, " "),
 				awayDefReb+awayOffReb,
 			),
 		)
 		str.WriteString(
-			fmt.Sprintf("%d%s%s%s%d\n",
+			fmt.Sprintf(lineReboundStatsFmt,
 				homeOffReb,
-				pad.AddString(5, " "),
 				"Off Reb",
-				pad.AddString(5, " "),
 				awayOffReb,
 			),
 		)
 		str.WriteString(
-			fmt.Sprintf("%2s%s%s%s%2s\n",
+			fmt.Sprintf(lineAssistStatsFmt,
 				home.Stats.Assists,
-				pad.AddString(5, " "),
 				"Assists",
-				pad.AddString(5, " "),
 				away.Stats.Assists,
 			),
 		)
 		str.WriteString(
-			fmt.Sprintf("%2s%s%s%s%2s\n",
+			fmt.Sprintf(lineStealStatsFmt,
 				home.Stats.Steals,
-				pad.AddString(6, " "),
 				"Steals",
-				pad.AddString(5, " "),
 				away.Stats.Steals,
 			),
 		)
 		str.WriteString(
-			fmt.Sprintf("%2s%s%s%s%2s\n",
+			fmt.Sprintf(lineTurnoverStatsFmt,
 				home.Stats.Turnovers,
-				pad.AddString(4, " "),
 				"Turnovers",
-				pad.AddString(4, " "),
 				away.Stats.Turnovers,
 			),
 		)
 
 	} else {
-		str.WriteString("errrr getting team stats")
+		str.WriteString("error getting team stats")
 	}
 	return str.String()
+}
+
+func toFraction(a, b string) string {
+	return fmt.Sprintf("%s/%s", a, b)
 }
