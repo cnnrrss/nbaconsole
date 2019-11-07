@@ -2,23 +2,46 @@ package app
 
 import (
 	"github.com/jroimartin/gocui"
-	log "github.com/sirupsen/logrus"
 )
 
-func keybindings(g *gocui.Gui) error {
+func (nba *NBAConsole) keybindings(g *gocui.Gui) error {
+	var err error
+
+	if err = g.SetKeybinding("", gocui.KeyArrowUp, gocui.ModNone, MoveUp); err != nil {
+		return err
+	}
+
+	if err = g.SetKeybinding("", gocui.KeyArrowDown, gocui.ModNone, MoveDown); err != nil {
+		return err
+	}
+
 	if err := g.SetKeybinding("", gocui.KeyCtrlC, gocui.ModNone, quit); err != nil {
-		log.Panicln(err)
+		return err
 	}
 
-	if err := g.SetKeybinding("", 'q', gocui.ModNone, quit); err != nil {
-		log.Panicln(err)
+	if err := g.SetKeybinding("", gocui.KeyCtrlQ, gocui.ModNone, quit); err != nil {
+		return err
 	}
 
-	if err := g.SetKeybinding("", gocui.KeyEnter, gocui.ModNone, quit); err != nil {
+	if err := g.SetKeybinding("", gocui.KeyCtrlR, gocui.ModNone, nba.keyfn(nba.ToggleScoreboard)); err != nil {
+		return err
+	}
+
+	if err := g.SetKeybinding(scoreboardLabel, gocui.KeyEnter, gocui.ModNone, nba.keyfn(nba.ToggleGameBoxScore)); err != nil {
+		return err
+	}
+
+	if err := g.SetKeybinding(scoreboardLabel, gocui.KeyCtrlT, gocui.ModNone, nba.keyfn(nba.ToggleTeamStats)); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func (nba *NBAConsole) keyfn(fn func() error) func(g *gocui.Gui, v *gocui.View) error {
+	return func(g *gocui.Gui, v *gocui.View) error {
+		return fn()
+	}
 }
 
 // MoveDown modifies the gocui cursor +1 on y axis
@@ -33,12 +56,6 @@ func MoveUp(g *gocui.Gui, v *gocui.View) error {
 	_, y := g.CurrentView().Cursor()
 	v.SetCursor(0, y-1)
 	return nil
-}
-
-func (nba *NBAConsole) keyfn(fn func() error) func(g *gocui.Gui, v *gocui.View) error {
-	return func(g *gocui.Gui, v *gocui.View) error {
-		return fn()
-	}
 }
 
 func quit(g *gocui.Gui, v *gocui.View) error {

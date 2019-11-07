@@ -3,115 +3,113 @@ package app
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
-	"math/rand"
+	"strings"
 	"sync"
 
 	"github.com/cnnrrss/nbaconsole/api"
+	"github.com/cnnrrss/nbaconsole/common/pad"
 )
 
-var scoreBoard, scoreBoardLock sync.Mutex
+var scoreBoard sync.Mutex
 
-func (nba *NBAConsole) getScoreboard(params map[string]string) error {
-	scoreBoard.Lock()
+var (
+	scoreBoardHeaderFmt string = "%-11s%-14s%-13s%s\n"
+	noGameScoresMsgFmt  string = "No hoops today, %s\n"
+	gameScoreFmt        string = "%-9s%-3s%2s%4s%11s%15s\n"
+)
 
+func (nba *NBAConsole) ToggleScoreboard() error {
+	// TODO: make better
+	nba.g.DeleteView(teamStatsLabel)
+	nba.g.DeleteView(boxScoreLabel)
+
+	go nba.setScoreboardView(nba.g)
+
+	return nil
+}
+
+// getScoreboard locks the current scoreBoard view and requests new data from
+// the NBA API. If the data is received, the scoreBoard view is written to stdout
+func (nba *NBAConsole) getScoreboard() error {
+	nba.scoreboard.Clear()
+	nba.g.SetCurrentView(scoreboardLabel)
+
+	params := genericParams(nba.date)
 	resp, err := api.GetDataScoreBoard(params)
 	if err != nil {
-		fmt.Fprintf(nba.scoreboard, "Error happened on get scoreboard")
 		return fmt.Errorf("Error with request %v", err)
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Fprintf(nba.scoreboard, "Error happened on get scoreboard")
 		return fmt.Errorf("Error reading request body %v", err)
 	}
 
 	sb := api.DataScoreboard{}
 	json.Unmarshal(body, &sb)
-	curW, _ := nba.g.Size()
 
+	scoreBoard.Lock()
 	nba.update(func() {
-		nba.scoreboard.Clear()
-		nba.setGames(sb)
-		nba.OuputScoreBoard(curW)
+		curW, _ := nba.g.Size()
+		nba.drawScoreboard(nba.scoreboard, sb, curW)
 	})
-
 	scoreBoard.Unlock()
 
 	return nil
 }
 
-var message = []string{
-	"Sorry no hoops today...",
-	"Ball is life.... ",
-	"Steph curry with the shot...",
-}
+func (nba *NBAConsole) drawScoreboard(output io.Writer, sb api.DataScoreboard, width int /** TODO */) {
+	nba.gamesList.Wipe()
 
-// OuputScoreBoard prints the current games to the scoreboard view
-func (nba *NBAConsole) OuputScoreBoard(width int) {
-	if len(nba.gamesList.games) > 0 {
-		fmt.Fprintln(nba.scoreboard, formatScoreBoardHeader(width-2))
-		fmt.Fprintln(nba.scoreboard, boxSeparator(width-2))
-		for i, game := range nba.gamesList.games {
-			item := fmt.Sprintf("%s\n", game)
-			fmt.Fprintf(nba.scoreboard, string(i)+item)
-			fmt.Fprintln(nba.scoreboard, boxSeparator(width-2))
-		}
-		return
-	}
-	n := rand.Intn(2)
-	fmt.Fprintf(nba.scoreboard, "%s %v\n", message[n], nba.date)
-	return
-}
+	var blob strings.Builder
+	headerString := fmt.Sprintf(scoreBoardHeaderFmt, "Home", "Score", "Away", "Status")
+	blob.WriteString(headerString)
+	blob.WriteString(
+		fmt.Sprintf("%s\n",
+			pad.AddString(len(headerString)-1, "-"),
+		),
+	)
 
-// genericParams returns basic parameters to include in an API request
-func genericParams(date string) map[string]string {
-	params := map[string]string{
-		"DayOffset": "0",
-		"LeagueID":  "00",
-		"gameDate":  date,
-	}
-	return params
-}
-
-func formatScoreBoardHeader(width int) string {
-	var header string
-	for _, h := range []string{"Away", "Home", "Score", "Status"} {
-		header += PadCenter(h, width/4)
-	}
-	return header
-}
-
-func (nba *NBAConsole) setGames(sb api.DataScoreboard) error {
-	data := make([]interface{}, len(sb.Games))
-	curX, _ := nba.g.Size()
-	for i, gm := range sb.Games {
-		var blob string
-		hScore, vScore := gm.Score()
-		blob += PadCenter(gm.VTeam.TriCode, (curX/4)-3)
-		blob += PadCenter(gm.HTeam.TriCode, (curX/4)-3)
-		scoreOffset := len(hScore) + len(vScore) + 1
-		if len(vScore) == 2 {
-			vScore = "_" + vScore
-		}
-		if len(hScore) == 2 {
-			hScore = "_" + hScore
-		}
-		blob += PadCenter(fmt.Sprintf("%s - %s", vScore, hScore), (curX/4)+scoreOffset)
-		blob += PadCenter(gm.Status(), (curX/4)-scoreOffset)
-
-		if gm.Playoffs.RoundNum != "" {
-			blob += fmt.Sprintf("%s", PadLeft(gm.Playoffs.SeriesSummaryText, 6))
-		}
-		data[i] = blob
+	for _, gm := range sb.Games {
+		blob.WriteString(formatGame(gm))
+		nba.gamesList.games = append(nba.gamesList.games, gm.GameID)
 	}
 
-	nba.gamesList.games = data
-	nba.gamesList.curIndex = 0
-	return nil
+	if len(nba.gamesList.games) == 0 {
+		blob.WriteString(
+			fmt.Sprintf(noGameScoresMsgFmt,
+				nba.message),
+		)
+	}
+
+	fmt.Fprintf(output, blob.String())
+
+	nba.scoreboard.SetOrigin(0, 0)
+	nba.scoreboard.SetCursor(0, 2)
+
+	highlightView(nba.scoreboard)
 }
 
-func boxSeparator(w int) string {
-	return fmt.Sprintf(Pad("-", w-1))
+func formatGame(gm api.Game) string {
+	var blob strings.Builder
+	hScore, vScore := gm.Score()
+	blob.WriteString(
+		fmt.Sprintf(gameScoreFmt,
+			gm.HTeam.TriCode,
+			hScore,
+			"-",
+			vScore,
+			gm.VTeam.TriCode,
+			gm.Status(),
+		),
+	)
+
+	if gm.Playoffs.RoundNum != "" {
+		// TODO: design new fmt
+		blob.WriteString(pad.Left(gm.Playoffs.SeriesSummaryText, 6, " "))
+	}
+
+	return blob.String()
 }

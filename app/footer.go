@@ -1,17 +1,31 @@
 package app
 
-import "fmt"
-
-var (
-	quitText = "Quit"
+import (
+	"fmt"
+	"time"
 )
 
-func (nba *NBAConsole) updateFooter(s string) {
+var (
+	footerFmt            string = "v%s  %s  %s  %s  %s[%s]"
+	quitText             string = "Quit[Q]"
+	lastUpdatedText      string = "Updated"
+	toggleBoxScoreText   string = "Stats[Ctrl+t]"
+	toggleScoreBoardText string = "Scores[Ctrl+r]"
+)
+
+func (nba *NBAConsole) updateFooter(s string /** TODO */) {
 	nba.update(func() {
 		nba.footerView.Clear()
-		base := fmt.Sprintf("%s: [Q]", quitText)
-		v := fmt.Sprintf(" Version: [%s]", nba.version())
-		str := PadLeft(fmt.Sprintf("%s", base), 8)
-		fmt.Fprintln(nba.footerView, fmt.Sprintf("%s %s", v, str))
+		nba.lastUpdated = time.Now()
+		fmt.Fprintln(nba.footerView,
+			fmt.Sprintf(footerFmt,
+				nba.version(),
+				quitText,
+				toggleBoxScoreText,
+				toggleScoreBoardText,
+				lastUpdatedText,
+				toHumanTime(nba.lastUpdated),
+			),
+		)
 	})
 }
