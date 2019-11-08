@@ -56,13 +56,20 @@ func (nba *NBAConsole) setScoreboardView(g *gocui.Gui) error {
 
 		nba.scoreboard = v
 		highlightView(nba.scoreboard)
-		scoreBoardBox := NewBox(v, false)
-		nba.gamesList = scoreBoardBox
 
-		go func() {
-			nba.getScoreboard()
-		}()
-		nba.pollScoreboardData()
+		if nba.gamesList == nil {
+			scoreBoardBox := NewBox(v, false)
+			nba.gamesList = scoreBoardBox
+
+		}
+
+		if len(nba.gamesList.games) == 0 {
+			go func() {
+				nba.getScoreboard()
+			}()
+			nba.pollScoreboardData()
+		}
+
 	}
 	return nil
 }
