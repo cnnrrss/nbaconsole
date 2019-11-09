@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"strconv"
+	"strings"
 
 	"github.com/cnnrrss/nbaconsole/api"
 )
@@ -91,8 +93,68 @@ func (nba *NBAConsole) getBoxScore() error {
 }
 
 func (nba *NBAConsole) drawBoxScore(output io.Writer, bs *GameScore, width int) {
-	fmt.Fprintln(output, bs.PointsLeaders())
-	fmt.Fprintln(output, bs.AssistsLeaders())
-	fmt.Fprintln(output, bs.ReboundsLeaders())
+	var str strings.Builder
+	str.WriteString(fmt.Sprintf("%-21s%-4s%-4s%-4s%-5s%s\n", "Team", "1", "2", "3", "4", "T"))
+	hLine, hTotal := HomeLineScores(bs)
+	str.WriteString(
+		fmt.Sprintf("%-20s%-5s%3d\n",
+			bs.GameBoxScore.SportsContent.Game.Home.City+" "+
+				bs.GameBoxScore.SportsContent.Game.Home.Nickname,
+			hLine,
+			hTotal,
+		),
+	)
+	vLine, vTotal := VisitorLineScores(bs)
+	str.WriteString(
+		fmt.Sprintf("%-20s%-5s%3d\n",
+			bs.GameBoxScore.SportsContent.Game.Visitor.City+" "+
+				bs.GameBoxScore.SportsContent.Game.Visitor.Nickname,
+			vLine,
+			vTotal,
+		),
+	)
+
+	fmt.Fprintln(output, str.String())
+	fmt.Fprintln(output, bs.BoxScoreLeaders())
 	highlightView(nba.scoreboard)
+}
+
+// HomeLineScores ...
+func HomeLineScores(bs *GameScore) (string, int) {
+	var lineScore strings.Builder
+	var total int
+	curPeriod := len(bs.GameBoxScore.SportsContent.Game.Home.Linescores.Period)
+
+	for i := 0; i < curPeriod || i <= 3; i++ {
+		if i >= curPeriod {
+			lineScore.WriteString(" -  ")
+		} else {
+			q, _ := strconv.Atoi(bs.GameBoxScore.SportsContent.Game.Home.Linescores.Period[i].Score)
+			total += q
+			lineScore.WriteString(
+				fmt.Sprintf("%2d  ", q),
+			)
+		}
+	}
+	return lineScore.String(), total
+}
+
+// VisitorLineScores ...
+func VisitorLineScores(bs *GameScore) (string, int) {
+	var lineScore strings.Builder
+	var total int
+	curPeriod := len(bs.GameBoxScore.SportsContent.Game.Visitor.Linescores.Period)
+
+	for i := 0; i < curPeriod || i <= 3; i++ {
+		if i >= curPeriod {
+			lineScore.WriteString(" -  ")
+		} else {
+			q, _ := strconv.Atoi(bs.GameBoxScore.SportsContent.Game.Visitor.Linescores.Period[i].Score)
+			total += q
+			lineScore.WriteString(
+				fmt.Sprintf("%2d  ", q),
+			)
+		}
+	}
+	return lineScore.String(), total
 }

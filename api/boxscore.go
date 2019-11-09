@@ -5,101 +5,73 @@ import (
 	"strings"
 )
 
-func (bs *GameBoxScore) PointsLeaders() string {
+func (bs *GameBoxScore) BoxScoreLeaders() string {
 	var str strings.Builder
-
 	if bs != nil {
-		home, away := bs.SportsContent.Game.Home, bs.SportsContent.Game.Visitor
+		home, visitor := bs.SportsContent.Game.Home, bs.SportsContent.Game.Visitor
+
+		str.WriteString(fmt.Sprintf("%s\n", home.Abbreviation))
 		if len(home.Leaders.Points.Leader) > 0 {
 			str.WriteString(
-				fmt.Sprintf("%s : %s %s %s pts\n",
-					home.Abbreviation,
+				fmt.Sprintf("%s %s %s pts\n",
 					home.Leaders.Points.Leader[0].FirstName,
 					home.Leaders.Points.Leader[0].LastName,
 					home.Leaders.Points.StatValue,
-				))
-		} else {
-			str.WriteString(fmt.Sprintf("no points leaders for %s\n", home.Abbreviation))
+				),
+			)
 		}
-		if len(home.Leaders.Points.Leader) > 0 {
-			str.WriteString(
-				fmt.Sprintf("%s : %s %s %s pts\n",
-					away.Abbreviation,
-					away.Leaders.Points.Leader[0].FirstName,
-					away.Leaders.Points.Leader[0].LastName,
-					away.Leaders.Points.StatValue,
-				))
-		} else {
-			str.WriteString(fmt.Sprintf("no points leaders for %s\n", away.Abbreviation))
-		}
-	} else {
-		str.WriteString("errrr getting points leaders")
-	}
-	return str.String()
-}
 
-func (bs *GameBoxScore) AssistsLeaders() string {
-	var str strings.Builder
-
-	if bs != nil {
-		home, away := bs.SportsContent.Game.Home, bs.SportsContent.Game.Visitor
 		if len(home.Leaders.Assists.Leader) > 0 {
 			str.WriteString(
-				fmt.Sprintf("%s : %s %s %s assists\n",
-					home.Abbreviation,
+				fmt.Sprintf("%s %s %s assists\n",
 					home.Leaders.Assists.Leader[0].FirstName,
 					home.Leaders.Assists.Leader[0].LastName,
 					home.Leaders.Assists.StatValue,
-				))
-		} else {
-			str.WriteString(fmt.Sprintf("no assists leaders for %s\n", home.Abbreviation))
+				),
+			)
 		}
 		if len(home.Leaders.Points.Leader) > 0 {
 			str.WriteString(
-				fmt.Sprintf("%s : %s %s %s assists\n",
-					away.Abbreviation,
-					away.Leaders.Assists.Leader[0].FirstName,
-					away.Leaders.Assists.Leader[0].LastName,
-					away.Leaders.Assists.StatValue,
-				))
-		} else {
-			str.WriteString(fmt.Sprintf("no assists leaders for %s\n", away.Abbreviation))
-		}
-	} else {
-		str.WriteString("errrr getting assists leaders")
-	}
-	return str.String()
-}
-
-func (bs *GameBoxScore) ReboundsLeaders() string {
-	var str strings.Builder
-
-	if bs != nil {
-		home, away := bs.SportsContent.Game.Home, bs.SportsContent.Game.Visitor
-		if len(home.Leaders.Rebounds.Leader) > 0 {
-			str.WriteString(
-				fmt.Sprintf("%s : %s %s %s rebs\n",
-					home.Abbreviation,
+				fmt.Sprintf("%s %s %s rebs\n",
 					home.Leaders.Rebounds.Leader[0].FirstName,
 					home.Leaders.Rebounds.Leader[0].LastName,
 					home.Leaders.Rebounds.StatValue,
-				))
-		} else {
-			str.WriteString(fmt.Sprintf("no rebounds leaders for %s\n", home.Abbreviation))
+				),
+			)
 		}
-		if len(home.Leaders.Points.Leader) > 0 {
+
+		str.WriteString(fmt.Sprintf("\n%s\n", visitor.Abbreviation))
+		if len(visitor.Leaders.Points.Leader) > 0 {
 			str.WriteString(
-				fmt.Sprintf("%s : %s %s %s rebs\n",
-					away.Abbreviation,
-					away.Leaders.Rebounds.Leader[0].FirstName,
-					away.Leaders.Rebounds.Leader[0].LastName,
-					away.Leaders.Rebounds.StatValue,
-				))
-		} else {
-			str.WriteString(fmt.Sprintf("no rebounds leaders for %s\n", away.Abbreviation))
+				fmt.Sprintf("%s %s %s pts\n",
+					visitor.Leaders.Points.Leader[0].FirstName,
+					visitor.Leaders.Points.Leader[0].LastName,
+					visitor.Leaders.Points.StatValue,
+				),
+			)
+		}
+
+		if len(visitor.Leaders.Points.Leader) > 0 {
+			str.WriteString(
+				fmt.Sprintf("%s %s %s assists\n",
+					visitor.Leaders.Assists.Leader[0].FirstName,
+					visitor.Leaders.Assists.Leader[0].LastName,
+					visitor.Leaders.Assists.StatValue,
+				),
+			)
+		}
+
+		if len(visitor.Leaders.Points.Leader) > 0 {
+			str.WriteString(
+				fmt.Sprintf("%s %s %s rebs\n",
+					visitor.Leaders.Rebounds.Leader[0].FirstName,
+					visitor.Leaders.Rebounds.Leader[0].LastName,
+					visitor.Leaders.Rebounds.StatValue,
+				),
+			)
 		}
 	} else {
-		str.WriteString("errrr getting rebounds leaders")
+		str.WriteString("errrr getting game leaders")
 	}
 	return str.String()
 }
