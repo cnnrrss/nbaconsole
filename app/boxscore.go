@@ -23,7 +23,7 @@ func (nba *NBAConsole) ToggleGameBoxScore() error {
 	return nil // TODO: handle errors gracefully
 }
 
-// HighlightedRowCoin returns the coin at the index of the highlighted row
+// SelectedGame returns the game of the highlighted row
 func (nba *NBAConsole) SelectedGame() string {
 	idx := nba.HighlightedRowIndex()
 	if len(nba.gamesList.games) == 0 {
