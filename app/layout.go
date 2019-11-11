@@ -22,11 +22,16 @@ var (
 	footerHeight = 2
 )
 
+var (
+	MIN_WIDTH  = 50
+	MIN_HEIGHT = 30
+)
+
 func (nba *NBAConsole) layout(g *gocui.Gui) error {
 	tw, th := g.Size()
 	if nba.curW != tw || nba.curH != th {
 		nba.refresh()
-		nba.curW, nba.curH = tw, th
+		nba.curW, nba.curH = min(tw, MIN_WIDTH), min(th, MIN_HEIGHT)
 	}
 
 	setMainView := func(g *gocui.Gui, fn func(g *gocui.Gui) error) {
@@ -99,4 +104,11 @@ func (nba *NBAConsole) setFooterView(g *gocui.Gui) error {
 		go nba.updateFooter("")
 	}
 	return nil
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }

@@ -94,10 +94,10 @@ func (nba *NBAConsole) getBoxScore() error {
 
 func (nba *NBAConsole) drawBoxScore(output io.Writer, bs *GameScore, width int) {
 	var str strings.Builder
-	str.WriteString(fmt.Sprintf("%-21s%-4s%-4s%-4s%-5s%s\n", "Team", "1", "2", "3", "4", "T"))
+	str.WriteString(fmt.Sprintf("%-25s%-4s%-4s%-4s%-5s%s\n", "Team", "1", "2", "3", "4", "T"))
 	hLine, hTotal := HomeLineScores(bs)
 	str.WriteString(
-		fmt.Sprintf("%-20s%-5s%3d\n",
+		fmt.Sprintf("%-23s%-5s%4d\n",
 			bs.GameBoxScore.SportsContent.Game.Home.City+" "+
 				bs.GameBoxScore.SportsContent.Game.Home.Nickname,
 			hLine,
@@ -106,7 +106,7 @@ func (nba *NBAConsole) drawBoxScore(output io.Writer, bs *GameScore, width int) 
 	)
 	vLine, vTotal := VisitorLineScores(bs)
 	str.WriteString(
-		fmt.Sprintf("%-20s%-5s%3d\n",
+		fmt.Sprintf("%-23s%-5s%4d\n",
 			bs.GameBoxScore.SportsContent.Game.Visitor.City+" "+
 				bs.GameBoxScore.SportsContent.Game.Visitor.Nickname,
 			vLine,
@@ -127,7 +127,7 @@ func HomeLineScores(bs *GameScore) (string, int) {
 
 	for i := 0; i < curPeriod || i <= 3; i++ {
 		if i >= curPeriod {
-			lineScore.WriteString(" -  ")
+			lineScore.WriteString("  - ")
 		} else {
 			q, _ := strconv.Atoi(bs.GameBoxScore.SportsContent.Game.Home.Linescores.Period[i].Score)
 			total += q
@@ -147,7 +147,7 @@ func VisitorLineScores(bs *GameScore) (string, int) {
 
 	for i := 0; i < curPeriod || i <= 3; i++ {
 		if i >= curPeriod {
-			lineScore.WriteString(" -  ")
+			lineScore.WriteString("  - ")
 		} else {
 			q, _ := strconv.Atoi(bs.GameBoxScore.SportsContent.Game.Visitor.Linescores.Period[i].Score)
 			total += q

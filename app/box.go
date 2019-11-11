@@ -7,7 +7,7 @@ import (
 	"github.com/jroimartin/gocui"
 )
 
-// TODO: v2 API, handle multipl pages
+// TODO: v2 API, handle multiple pages
 
 // Page ...
 type Page struct {
@@ -38,7 +38,6 @@ func NewBox(v *gocui.View, sorted bool) *Box {
 	b.SelFgColor = gocui.ColorWhite
 	b.Autoscroll = true
 	b.sorted = sorted
-
 	return b
 }
 
@@ -77,37 +76,3 @@ func (b *Box) currPageNum() int {
 func (b *Box) pagesNum() int {
 	return len(b.pages)
 }
-
-// Focus hightlights the View of the current List
-// func (b *Box) Focus(g *gocui.Gui) error {
-// 	b.Highlight = true
-// 	_, err := g.SetCurrentView(b.Name())
-
-// 	return err
-// }
-
-// func (b *Box) currPage() Page {
-// 	return b.pages[b.currentIdx]
-// }
-
-// func (b *Box) displayGame(bi int) error {
-// 	b.Clear()
-// 	b.currentIdx = bi
-// 	box := b.pages[b.currentIdx]
-// 	for i := box.Offset; i < box.Offset+box.Limit; i++ {
-// 		if _, err := fmt.Fprintln(b.View, b.displayBoxGame(i)); err != nil {
-// 			return err
-// 		}
-// 	}
-// 	return nil
-// }
-
-// func (b *Box) displayBoxGame(i int) string {
-// 	item := fmt.Sprint(b.games[i])
-// 	x, _ := b.Size()
-// 	sp := pad.AddString(x - 1 - len(item) - 3, " ")
-// 	if b.sorted {
-// 		return fmt.Sprintf(">>>>%2d. %v%v", i+1, item, sp)
-// 	}
-// 	return fmt.Sprintf(">>> %v%v", item, sp)
-// }

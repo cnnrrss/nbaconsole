@@ -68,7 +68,8 @@ func (nba *NBAConsole) Start() {
 	defer g.Close()
 
 	nba.g = g
-	nba.curW, nba.curH = g.Size()
+	gw, gh := g.Size()
+	nba.curW, nba.curH = min(gw, MIN_WIDTH), min(gh, MIN_HEIGHT)
 	g.SetManagerFunc(nba.layout)
 	nba.keybindings(g)
 
