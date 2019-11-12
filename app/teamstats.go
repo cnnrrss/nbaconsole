@@ -19,12 +19,13 @@ func (nba *NBAConsole) ToggleTeamStats() error {
 }
 
 func (nba *NBAConsole) setTeamStatsView(g *gocui.Gui, gameID string) error {
-	if v, err := g.SetView(teamStatsLabel, globalX0, scoreboardY0, nba.curW-1, nba.curH-footerHeight-footerHeight); err != nil {
+	if v, err := g.SetView(teamStatsLabel, 0 /** globalX0 */, 0 /** scoreboardY0 */, nba.curW-1, nba.curH-footerHeight-footerHeight); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
 
 		nba.teamStats = v
+		nba.teamStats.Frame = false
 
 		go func() {
 			nba.setTeamStats()

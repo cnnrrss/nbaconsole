@@ -6,11 +6,11 @@ import (
 )
 
 var (
-	footerFmt            string = "v%s  %s  %s  %s  %s[%s]"
+	footerFmt            string = "%s %s %s %s"
 	quitText             string = "Quit[Q]"
-	lastUpdatedText      string = "Updated"
-	toggleBoxScoreText   string = "Stats[Ctrl+t]"
-	toggleScoreBoardText string = "Scores[Ctrl+r]"
+	toggleBoxScoreText   string = "Box[enter]"
+	toggleTeamStatsText  string = "Stats[Ctl+t]"
+	toggleScoreBoardText string = "Home[Ctl+r]"
 )
 
 func (nba *NBAConsole) updateFooter(s string /** TODO */) {
@@ -19,12 +19,10 @@ func (nba *NBAConsole) updateFooter(s string /** TODO */) {
 		nba.lastUpdated = time.Now()
 		fmt.Fprintln(nba.footerView,
 			fmt.Sprintf(footerFmt,
-				nba.version(),
 				quitText,
 				toggleBoxScoreText,
+				toggleTeamStatsText,
 				toggleScoreBoardText,
-				lastUpdatedText,
-				toHumanTime(nba.lastUpdated),
 			),
 		)
 	})

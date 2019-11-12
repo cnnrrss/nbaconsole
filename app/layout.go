@@ -60,6 +60,7 @@ func (nba *NBAConsole) setScoreboardView(g *gocui.Gui) error {
 		)
 
 		nba.scoreboard = v
+		nba.scoreboard.Frame = false
 		highlightView(nba.scoreboard)
 
 		if nba.gamesList == nil {
@@ -80,12 +81,13 @@ func (nba *NBAConsole) setScoreboardView(g *gocui.Gui) error {
 }
 
 func (nba *NBAConsole) setBoxScoreView(g *gocui.Gui, gameID string) error {
-	if v, err := g.SetView(boxScoreLabel, globalX0, scoreboardY0, nba.curW-1, nba.curH-footerHeight-footerHeight); err != nil {
+	if v, err := g.SetView(boxScoreLabel, 0 /** globalX0 */, 0 /** scoreboardY0 */, nba.curW-1, nba.curH-footerHeight-footerHeight); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
 
 		nba.boxScore = v
+		nba.boxScore.Frame = false
 
 		go func() {
 			nba.getBoxScore()
@@ -100,7 +102,7 @@ func (nba *NBAConsole) setFooterView(g *gocui.Gui) error {
 			return err
 		}
 		nba.footerView = v
-		nba.footerView.Frame = true
+		nba.footerView.Frame = false
 		go nba.updateFooter("")
 	}
 	return nil
