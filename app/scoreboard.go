@@ -20,6 +20,8 @@ var (
 	gameScoreFmt        string = "%-9s%-3s%2s%4s%11s%15s\n"
 )
 
+// ToggleScoreboard toggles the scoreboard view and
+// deletes any current view that may be displayed
 func (nba *NBAConsole) ToggleScoreboard() error {
 	// TODO: make better
 	nba.g.DeleteView(teamStatsLabel)
@@ -33,7 +35,7 @@ func (nba *NBAConsole) ToggleScoreboard() error {
 // getScoreboard locks the current scoreBoard view and requests new data from
 // the NBA API. If the data is received, the scoreBoard view is written to stdout
 func (nba *NBAConsole) getScoreboard() error {
-	nba.scoreboard.Clear()
+	// nba.scoreboard.Clear() don't clear its annoying
 	nba.g.SetCurrentView(scoreboardLabel)
 
 	params := genericParams(nba.date)

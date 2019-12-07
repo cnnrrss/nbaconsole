@@ -35,8 +35,8 @@ BoxScore|`Ctrl+t`|View team stats for currently selected games' boxscore|
 - [x] **Specify Date**: Optionally view scoreboard on any date
     - [x] Pass in a flag `-d 20190310` with a value in `YYYYMMDD` format to view games from a specific date
 - [x] **Developer Productivity**: Track NBA scoress while you continue to live in the terminal
-- [ ] **Game Box Score**: View players box score from a selected game
-- [ ] **Game Team Stats**: View team statistics from a selected game
+- [x] **Game Box Score**: View players box score from a selected game
+- [x] **Game Team Stats**: View team statistics from a selected game
 
 
 

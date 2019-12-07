@@ -84,10 +84,14 @@ type Game struct {
 	HTeam  Team   `json:"hTeam"`
 	VTeam  Team   `json:"vTeam"`
 }
+
+// Nugget is a snippet or highlight about the game
 type Nugget struct {
 	Text string `json:"text"`
 }
 
+// Period provides data related to 4
+// or more periods played in the game
 type Period struct {
 	Current       int  `json:"current"`
 	Type          int  `json:"type"`
@@ -95,6 +99,9 @@ type Period struct {
 	IsHalftime    bool `json:"isHalftime"`
 	IsEndOfPeriod bool `json:"isEndOfPeriod"`
 }
+
+// Team provides data about an nba team
+// in the context of the game boxscore
 type Team struct {
 	TeamID     string `json:"teamId"`
 	TriCode    string `json:"triCode"`
@@ -108,6 +115,10 @@ type Team struct {
 	} `json:"linescore"`
 }
 
+// DummyDataScoreboard provides a fake scoreboard
+// to the nbaconsole app package for the purposes
+// of testing. TODO: this will be depracated in a
+// future release.
 func DummyDataScoreboard() DataScoreboard {
 	return DataScoreboard{
 		Games: []Game{

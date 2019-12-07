@@ -7,7 +7,7 @@ import (
 
 const (
 	// YYYYMMDD is the NBA API Date format
-	YYYYMMDD = "20060102"
+	YYYYMMDD string = "20060102"
 )
 
 var (
@@ -16,7 +16,7 @@ var (
 		"Ball is life...",
 		"Steph curry with the shot...",
 		"Ball don't lie...",
-		"Ben Simmons for 3...",
+		"Ben Simmons for 3...", // and he made 1!
 	}
 )
 

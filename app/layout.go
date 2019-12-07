@@ -8,30 +8,31 @@ import (
 )
 
 var (
-	globalX0 = 1
-
-	headerLabel = "NBA Console"
-
-	scoreboardLabel = "scoreboard"
-	scoreboardY0    = 1
-
-	boxScoreLabel  = "boxscore"
-	teamStatsLabel = "teamstats"
-
-	footerLabel  = "footer"
-	footerHeight = 2
+	globalX0     int = 1
+	scoreboardY0 int = 1
+	footerHeight int = 2
 )
 
 var (
-	MIN_WIDTH  = 50
-	MIN_HEIGHT = 30
+	headerLabel     string = "NBA Console"
+	scoreboardLabel string = "scoreboard"
+	boxScoreLabel   string = "boxscore"
+	teamStatsLabel  string = "teamstats"
+	footerLabel     string = "footer"
+)
+
+var (
+	// MINWIDTH required to display the app
+	MINWIDTH int = 50
+	// MINHEIGHT required to display the app
+	MINHEIGHT int = 30
 )
 
 func (nba *NBAConsole) layout(g *gocui.Gui) error {
 	tw, th := g.Size()
 	if nba.curW != tw || nba.curH != th {
 		nba.refresh()
-		nba.curW, nba.curH = min(tw, MIN_WIDTH), min(th, MIN_HEIGHT)
+		nba.curW, nba.curH = min(tw, MINWIDTH), min(th, MINHEIGHT)
 	}
 
 	setMainView := func(g *gocui.Gui, fn func(g *gocui.Gui) error) {

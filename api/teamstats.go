@@ -8,15 +8,16 @@ import (
 )
 
 var (
-	lineTeamStatsHeaderFmt = "%-8s%-6s%7s\n"
-	lineShotAttemptsFmt    = "%-9s%-7s%5s\n"
-	lineShotPercentageFmt  = "%-10s%-7s%3s\n"
-	lineReboundStatsFmt    = "%-7d%s%7d\n"
-	lineAssistStatsFmt     = "%-7s%s%7s\n"
-	lineStealStatsFmt      = "%-8s%s%7s\n"
-	lineTurnoverStatsFmt   = "%-6s%-6s%6s\n"
+	lineTeamStatsHeaderFmt string = "%-8s%-6s%7s\n"
+	lineShotAttemptsFmt    string = "%-9s%-7s%5s\n"
+	lineShotPercentageFmt  string = "%-10s%-7s%3s\n"
+	lineReboundStatsFmt    string = "%-7d%s%7d\n"
+	lineAssistStatsFmt     string = "%-7s%s%7s\n"
+	lineStealStatsFmt      string = "%-8s%s%7s\n"
+	lineTurnoverStatsFmt   string = "%-6s%-6s%6s\n"
 )
 
+// TeamStats returns the team stats for a game
 func (bs *GameBoxScore) TeamStats() string {
 	var str strings.Builder
 	if bs != nil {

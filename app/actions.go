@@ -36,10 +36,8 @@ func (nba *NBAConsole) pollScoreboardData() {
 			select {
 			case <-nba.forceRefresh:
 				nba.refreshScoreboardView()
-				go nba.updateFooter("")
 			case <-nba.refreshTicker.C:
 				nba.refreshScoreboardView()
-				go nba.updateFooter("")
 			}
 		}
 	}()

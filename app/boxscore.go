@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/cnnrrss/nbaconsole/api"
+	"github.com/cnnrrss/nbaconsole/common/pad"
 )
 
 // ToggleGameBoxScore toggles between the global scoreboard and the game box score
@@ -94,21 +95,22 @@ func (nba *NBAConsole) getBoxScore() error {
 
 func (nba *NBAConsole) drawBoxScore(output io.Writer, bs *GameScore, width int) {
 	var str strings.Builder
+
 	str.WriteString(fmt.Sprintf("%-25s%-4s%-4s%-4s%-5s%s\n", "Team", "1", "2", "3", "4", "T"))
+	str.WriteString(fmt.Sprintf("%s\n", pad.AddString(str.Len(), "-")))
+
 	hLine, hTotal := HomeLineScores(bs)
 	str.WriteString(
-		fmt.Sprintf("%-23s%-5s%4d\n",
-			bs.GameBoxScore.SportsContent.Game.Home.City+" "+
-				bs.GameBoxScore.SportsContent.Game.Home.Nickname,
+		fmt.Sprintf("%-24s%-5s%4d\n",
+			api.NBATeamDictionary[bs.GameBoxScore.SportsContent.Game.Home.Abbreviation],
 			hLine,
 			hTotal,
 		),
 	)
 	vLine, vTotal := VisitorLineScores(bs)
 	str.WriteString(
-		fmt.Sprintf("%-23s%-5s%4d\n",
-			bs.GameBoxScore.SportsContent.Game.Visitor.City+" "+
-				bs.GameBoxScore.SportsContent.Game.Visitor.Nickname,
+		fmt.Sprintf("%-24s%-5s%4d\n",
+			api.NBATeamDictionary[bs.GameBoxScore.SportsContent.Game.Visitor.Abbreviation],
 			vLine,
 			vTotal,
 		),

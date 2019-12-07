@@ -16,11 +16,7 @@ func Left(str string, length int, pad string) string {
 	return times(pad, length-len(str)) + str
 }
 
-// Right right-pads the string with pad up to len runes
-func Right(str string, length int, pad string) string {
-	return str + times(pad, length-len(str))
-}
-
+// AddString adds the passed in string _n_ times
 func AddString(n int, s string) string {
 	var str strings.Builder
 	for i := 0; i < n; i++ {

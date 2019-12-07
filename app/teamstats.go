@@ -6,7 +6,7 @@ import (
 	"github.com/jroimartin/gocui"
 )
 
-// ToggleGameBoxScore toggles between the global scoreboard and the game box score
+// ToggleTeamStats toggles between the global scoreboard and the game box score
 func (nba *NBAConsole) ToggleTeamStats() error {
 	selectedGame := nba.SelectedGame()
 	if nba.selectedGame != selectedGame {
