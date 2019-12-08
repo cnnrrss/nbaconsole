@@ -32,16 +32,10 @@ type DataScoreboard struct {
 
 // Game is the game data embedded in the DataScoreboard type
 type Game struct {
-	SeasonStageID int    `json:"seasonStageId"`
-	SeasonYear    string `json:"seasonYear"`
-	GameID        string `json:"gameId"`
-	Arena         struct {
-		Name       string `json:"name"`
-		IsDomestic bool   `json:"isDomestic"`
-		City       string `json:"city"`
-		StateAbbr  string `json:"stateAbbr"`
-		Country    string `json:"country"`
-	} `json:"arena"`
+	SeasonStageID         int       `json:"seasonStageId"`
+	SeasonYear            string    `json:"seasonYear"`
+	GameID                string    `json:"gameId"`
+	Arena                 ArenaInfo `json:"arena"`
 	IsGameActivated       bool      `json:"isGameActivated"`
 	StatusNum             int       `json:"statusNum"`
 	ExtendedStatusNum     int       `json:"extendedStatusNum"`
@@ -60,29 +54,11 @@ type Game struct {
 		Hours   string `json:"hours"`
 		Minutes string `json:"minutes"`
 	} `json:"gameDuration"`
-	Tags     []string `json:"tags"`
-	Playoffs struct {
-		RoundNum          string `json:"roundNum"`
-		ConfName          string `json:"confName"`
-		SeriesID          string `json:"seriesId"`
-		SeriesSummaryText string `json:"seriesSummaryText"`
-		IsSeriesCompleted bool   `json:"isSeriesCompleted"`
-		GameNumInSeries   string `json:"gameNumInSeries"`
-		IsIfNecessary     bool   `json:"isIfNecessary"`
-		PVTeam            struct {
-			SeedNum        string `json:"seedNum"`
-			SeriesWin      string `json:"seriesWin"`
-			IsSeriesWinner bool   `json:"isSeriesWinner"`
-		} `json:"vTeam"`
-		PHTeam struct {
-			SeedNum        string `json:"seedNum"`
-			SeriesWin      string `json:"seriesWin"`
-			IsSeriesWinner bool   `json:"isSeriesWinner"`
-		} `json:"hTeam"`
-	} `json:"playoffs"`
-	Period Period `json:"period"`
-	HTeam  Team   `json:"hTeam"`
-	VTeam  Team   `json:"vTeam"`
+	Tags     []string      `json:"tags"`
+	Playoffs PlayoffInfo   `json:"playoffs"`
+	Period   Period        `json:"period"`
+	HTeam    TeamLineScore `json:"hTeam"`
+	VTeam    TeamLineScore `json:"vTeam"`
 }
 
 // Nugget is a snippet or highlight about the game
@@ -102,7 +78,7 @@ type Period struct {
 
 // Team provides data about an nba team
 // in the context of the game boxscore
-type Team struct {
+type TeamLineScore struct {
 	TeamID     string `json:"teamId"`
 	TriCode    string `json:"triCode"`
 	Win        string `json:"win"`
@@ -113,6 +89,32 @@ type Team struct {
 	Linescore  []struct {
 		Score string `json:"score"`
 	} `json:"linescore"`
+}
+
+type PlayoffInfo struct {
+	RoundNum          string      `json:"roundNum"`
+	ConfName          string      `json:"confName"`
+	SeriesID          string      `json:"seriesId"`
+	SeriesSummaryText string      `json:"seriesSummaryText"`
+	IsSeriesCompleted bool        `json:"isSeriesCompleted"`
+	GameNumInSeries   string      `json:"gameNumInSeries"`
+	IsIfNecessary     bool        `json:"isIfNecessary"`
+	PVTeam            PlayoffTeam `json:"vTeam"`
+	PHTeam            PlayoffTeam `json:"hTeam"`
+}
+
+type PlayoffTeam struct {
+	SeedNum        string `json:"seedNum"`
+	SeriesWin      string `json:"seriesWin"`
+	IsSeriesWinner bool   `json:"isSeriesWinner"`
+}
+
+type ArenaInfo struct {
+	Name       string `json:"name"`
+	IsDomestic bool   `json:"isDomestic"`
+	City       string `json:"city"`
+	StateAbbr  string `json:"stateAbbr"`
+	Country    string `json:"country"`
 }
 
 // DummyDataScoreboard provides a fake scoreboard
@@ -127,11 +129,11 @@ func DummyDataScoreboard() DataScoreboard {
 				Nugget: Nugget{
 					Text: "Curry 30pts 10/10 3pts",
 				},
-				VTeam: Team{
+				VTeam: TeamLineScore{
 					TriCode: "GSW",
 					Score:   "110",
 				},
-				HTeam: Team{
+				HTeam: TeamLineScore{
 					TriCode: "LAC",
 					Score:   "89",
 				},
@@ -146,11 +148,11 @@ func DummyDataScoreboard() DataScoreboard {
 				Nugget: Nugget{
 					Text: "Booker 77 pts",
 				},
-				VTeam: Team{
+				VTeam: TeamLineScore{
 					TriCode: "PHX",
 					Score:   "77",
 				},
-				HTeam: Team{
+				HTeam: TeamLineScore{
 					TriCode: "LAL",
 					Score:   "150",
 				},
@@ -165,11 +167,11 @@ func DummyDataScoreboard() DataScoreboard {
 				Nugget: Nugget{
 					Text: "Harden 110 pts",
 				},
-				VTeam: Team{
+				VTeam: TeamLineScore{
 					TriCode: "HOU",
 					Score:   "110",
 				},
-				HTeam: Team{
+				HTeam: TeamLineScore{
 					TriCode: "BKN",
 					Score:   "121",
 				},
@@ -184,11 +186,11 @@ func DummyDataScoreboard() DataScoreboard {
 				Nugget: Nugget{
 					Text: "Lowry 0/11 3pts",
 				},
-				VTeam: Team{
+				VTeam: TeamLineScore{
 					TriCode: "TOR",
 					Score:   "58",
 				},
-				HTeam: Team{
+				HTeam: TeamLineScore{
 					TriCode: "BOS",
 					Score:   "43",
 				},
@@ -204,11 +206,11 @@ func DummyDataScoreboard() DataScoreboard {
 				Nugget: Nugget{
 					Text: "",
 				},
-				VTeam: Team{
+				VTeam: TeamLineScore{
 					TriCode: "NYK",
 					Score:   "3",
 				},
-				HTeam: Team{
+				HTeam: TeamLineScore{
 					TriCode: "CHA",
 					Score:   "10",
 				},
@@ -224,10 +226,10 @@ func DummyDataScoreboard() DataScoreboard {
 				Nugget: Nugget{
 					Text: "",
 				},
-				VTeam: Team{
+				VTeam: TeamLineScore{
 					TriCode: "NOP",
 				},
-				HTeam: Team{
+				HTeam: TeamLineScore{
 					TriCode: "CLE",
 				},
 				StatusNum: 0,
