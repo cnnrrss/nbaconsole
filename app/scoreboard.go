@@ -20,24 +20,22 @@ var (
 	gameScoreFmt        string = "%-9s%-3s%2s%4s%11s%15s\n"
 )
 
-// ToggleScoreboard toggles the scoreboard view and
-// deletes any current view that may be displayed
-func (nba *NBAConsole) ToggleScoreboard() error {
-	// TODO: make better
-	nba.g.DeleteView(teamStatsLabel)
-	nba.g.DeleteView(boxScoreLabel)
+func (nba *NBAConsole) toggleScoreboard() error {
 
-	go nba.setScoreboardView(nba.g)
+	if nba.scoreboard != nil && nba.boxScore != nil {
+		nba.teamStats.Clear() // TODO: make better
+
+		nba.g.SetViewOnTop(scoreboardLabel) // todo: make better
+		nba.g.SetViewOnTop(boxScoreLabel)
+		return nil
+	}
+
+	go nba.getScoreboard()
 
 	return nil
 }
 
-// getScoreboard locks the current scoreBoard view and requests new data from
-// the NBA API. If the data is received, the scoreBoard view is written to stdout
 func (nba *NBAConsole) getScoreboard() error {
-	// nba.scoreboard.Clear() don't clear its annoying
-	nba.g.SetCurrentView(scoreboardLabel)
-
 	params := genericParams(nba.date)
 	resp, err := api.GetDataScoreBoard(params)
 	if err != nil {
@@ -63,38 +61,47 @@ func (nba *NBAConsole) getScoreboard() error {
 }
 
 func (nba *NBAConsole) drawScoreboard(output io.Writer, sb api.DataScoreboard, width int /** TODO */) {
-	nba.gamesList.Wipe()
+	nba.gamesList.wipe() // don't redraw the games
 
-	var blob strings.Builder
+	var scoreboardBlob strings.Builder
 	headerString := fmt.Sprintf(scoreBoardHeaderFmt, "Home", "Score", "Away", "Status")
-	blob.WriteString(headerString)
-	blob.WriteString(
+	scoreboardBlob.WriteString(headerString)
+	scoreboardBlob.WriteString(
 		fmt.Sprintf("%s\n",
 			pad.AddString(len(headerString)-1, "-"),
 		),
 	)
 
 	for _, gm := range sb.Games {
-		blob.WriteString(formatGame(gm))
-		nba.gamesList.games = append(nba.gamesList.games, gm.GameID)
+		scoreboardBlob.WriteString(formatGames(gm))
+		nba.gamesList.gameIDs = append(nba.gamesList.gameIDs, gm.GameID)
 	}
 
-	if len(nba.gamesList.games) == 0 {
-		blob.WriteString(
+	if len(nba.gamesList.gameIDs) > 0 {
+		nba.selectedGameID = nba.gamesList.gameIDs[0]
+	}
+
+	// TODO: this call probs shouldn't be here
+	// go nba.getBoxScore() choose not to pull
+	// in a goroutine because it renders cleaner
+	nba.getBoxScore()
+
+	if len(nba.gamesList.gameIDs) == 0 {
+		scoreboardBlob.WriteString(
 			fmt.Sprintf(noGameScoresMsgFmt,
 				nba.message),
 		)
 	}
 
-	fmt.Fprintf(output, blob.String())
+	fmt.Fprintf(output, scoreboardBlob.String())
 
-	nba.scoreboard.SetOrigin(0, 0)
-	nba.scoreboard.SetCursor(0, 2)
+	nba.g.CurrentView().SetOrigin(0, 0)
+	nba.g.CurrentView().SetCursor(0, 2)
 
 	highlightView(nba.scoreboard)
 }
 
-func formatGame(gm api.Game) string {
+func formatGames(gm api.Game) string {
 	var blob strings.Builder
 	hScore, vScore := gm.Score()
 	blob.WriteString(

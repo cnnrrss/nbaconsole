@@ -7,9 +7,9 @@ import (
 	"github.com/cnnrrss/nbaconsole/api"
 )
 
-func Test__formatGame(t *testing.T) {
+func Test__formatGames(t *testing.T) {
 	sb := api.DummyDataScoreboard()
 	for _, gm := range sb.Games {
-		fmt.Printf(formatGame(gm))
+		fmt.Printf(formatGames(gm))
 	}
 }

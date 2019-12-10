@@ -1,7 +1,6 @@
 package app
 
 import (
-	"fmt"
 	"time"
 )
 
@@ -40,8 +39,4 @@ func currentDateYYYYMMDD(tz string) string {
 func toHumanDate(date string) string {
 	t, _ := time.Parse(YYYYMMDD, date)
 	return t.Format("Mon Jan 02 2006")
-}
-
-func toHumanTime(t time.Time) string {
-	return fmt.Sprintf("%02d:%02d:%02d", t.Hour(), t.Minute(), t.Second())
 }

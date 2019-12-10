@@ -6,20 +6,25 @@ import (
 	"github.com/jroimartin/gocui"
 )
 
-// ToggleTeamStats toggles between the global scoreboard and the game box score
-func (nba *NBAConsole) ToggleTeamStats() error {
-	selectedGame := nba.SelectedGame()
-	if nba.selectedGame != selectedGame {
-		nba.selectedGame = selectedGame
+func (nba *NBAConsole) toggleTeamStats() error {
+	currentGameID := nba.getSelectedGameID()
+	if nba.selectedGameScore.GameID() != currentGameID {
+		nba.selectedGameID = currentGameID
 	}
 
-	go nba.setTeamStatsView(nba.g, nba.selectedGame)
+	go nba.setTeamStatsView(nba.g)
 
 	return nil
 }
 
-func (nba *NBAConsole) setTeamStatsView(g *gocui.Gui, gameID string) error {
-	if v, err := g.SetView(teamStatsLabel, 0 /** globalX0 */, 0 /** scoreboardY0 */, nba.curW-1, nba.curH-footerHeight-footerHeight); err != nil {
+func (nba *NBAConsole) setTeamStatsView(g *gocui.Gui) error {
+	if v, err := g.SetView(
+		teamStatsLabel,
+		0, /** globalX0 */
+		0, /** scoreboardY0 */
+		nba.curW-1,
+		nba.curH-footerHeight-footerHeight,
+	); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
@@ -34,11 +39,12 @@ func (nba *NBAConsole) setTeamStatsView(g *gocui.Gui, gameID string) error {
 	return nil
 }
 
-func (nba *NBAConsole) setTeamStats() error {
+func (nba *NBAConsole) setTeamStats() error { // TODO: change to draw for consistent API
 	nba.g.SetCurrentView(teamStatsLabel)
 	nba.update(func() {
 		nba.teamStats.Clear()
-		fmt.Fprintln(nba.teamStats, nba.selectedGameScore.TeamStats())
+		fmt.Fprintln(nba.teamStats, fmt.Sprintf("%s\n\n", nba.selectedGameScore.TeamStats()))
+		fmt.Fprintln(nba.teamStats, nba.selectedGameScore.BoxScoreLeaders())
 	})
 	return nil
 }

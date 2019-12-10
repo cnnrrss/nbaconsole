@@ -1,9 +1,13 @@
 package app
 
 import (
+	"fmt"
 	"log"
 	"math/rand"
+	"os"
 	"time"
+
+	"github.com/cnnrrss/nbaconsole/api"
 
 	"github.com/jroimartin/gocui"
 )
@@ -30,8 +34,8 @@ type NBAConsole struct {
 	done          chan bool
 
 	// stateful nba game data
-	selectedGame      string
-	selectedGameScore *GameScore // TODO: implement caching
+	selectedGameID    string
+	selectedGameScore *api.GameBoxScore // TODO: implement caching
 	gamesList         *Box
 
 	// additional console state
@@ -71,7 +75,10 @@ func (nba *NBAConsole) Start() {
 	gw, gh := g.Size()
 	nba.curW, nba.curH = min(gw, MINWIDTH), min(gh, MINHEIGHT)
 	g.SetManagerFunc(nba.layout)
-	nba.keybindings(g)
+	if err := nba.keybindings(g); err != nil {
+		nba.debuglog(fmt.Sprintf("cant set keybindings %v\n", err))
+		os.Exit(1)
+	}
 
 	if err := g.MainLoop(); err != nil && err != gocui.ErrQuit {
 		log.Fatalf("main loop exiting: %v", err)

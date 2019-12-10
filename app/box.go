@@ -3,11 +3,8 @@ package app
 import (
 	"fmt"
 
-	"github.com/cnnrrss/nbaconsole/api"
 	"github.com/jroimartin/gocui"
 )
-
-// TODO: v2 API, handle multiple pages
 
 // Page ...
 type Page struct {
@@ -17,21 +14,14 @@ type Page struct {
 // Box extends gocui.View with game specific info
 type Box struct {
 	*gocui.View
-	games      []string
+	gameIDs    []string
 	pages      []Page
 	currentIdx int
 	sorted     bool
 }
 
-type GameScore struct {
-	api.GameBoxScore
-	// ID of the GameScore used to make
-	// additional requests to the NBA API
-	ID string
-}
-
-// NewBox initializes a Box object with an existing gocui.View
-func NewBox(v *gocui.View, sorted bool) *Box {
+// newBox initializes a Box object with an existing gocui.View
+func newBox(v *gocui.View, sorted bool) *Box {
 	b := &Box{}
 	b.View = v
 	b.SelBgColor = gocui.ColorBlack
@@ -41,22 +31,22 @@ func NewBox(v *gocui.View, sorted bool) *Box {
 	return b
 }
 
-// Wipe wipes a box from the terminal
-func (b *Box) Wipe() {
-	b.games = make([]string, 0)
+// wipe wipes a box from the terminal
+func (b *Box) wipe() {
+	b.gameIDs = make([]string, 0)
 	b.pages = []Page{}
 	b.Clear()
-	b.SetCursor(0, 0)
+	b.SetCursor(0, 2)
 }
 
-// IsEmpty indicates whether a Box has any items
-func (b *Box) IsEmpty() bool {
-	return len(b.games) == 0
+// isEmpty indicates whether a Box has any items
+func (b *Box) isEmpty() bool {
+	return len(b.gameIDs) == 0
 }
 
-// SetHeader will set the title of the View and display paging information of the
+// setHeader will set the title of the View and display paging information of the
 // list if there are more than one pages
-func (b *Box) SetHeader(header string) {
+func (b *Box) setHeader(header string) {
 	b.Title = header
 
 	if b.pagesNum() > 1 {
@@ -67,7 +57,7 @@ func (b *Box) SetHeader(header string) {
 }
 
 func (b *Box) currPageNum() int {
-	if b.IsEmpty() {
+	if b.isEmpty() {
 		return 0
 	}
 	return b.currentIdx + 1

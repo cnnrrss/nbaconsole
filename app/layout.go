@@ -2,7 +2,6 @@ package app
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/jroimartin/gocui"
 )
@@ -37,11 +36,11 @@ func (nba *NBAConsole) layout(g *gocui.Gui) error {
 
 	setMainView := func(g *gocui.Gui, fn func(g *gocui.Gui) error) {
 		if err := fn(g); err != nil {
-			log.Printf("error setting layout %v\n", err)
+			nba.debuglog(fmt.Sprintf("error setting layout %v\n", err))
 		}
 	}
-
 	setMainView(g, nba.setScoreboardView)
+	setMainView(g, nba.setBoxScoreView)
 	setMainView(g, nba.setFooterView)
 
 	g.SetCurrentView(scoreboardLabel)
@@ -50,7 +49,7 @@ func (nba *NBAConsole) layout(g *gocui.Gui) error {
 }
 
 func (nba *NBAConsole) setScoreboardView(g *gocui.Gui) error {
-	if v, err := g.SetView(scoreboardLabel, 0, 0, nba.curW-1, nba.curH-footerHeight-footerHeight); err != nil {
+	if v, err := g.SetView(scoreboardLabel, 0, 7, nba.curW-1, nba.curH-(footerHeight*2)); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
@@ -61,40 +60,44 @@ func (nba *NBAConsole) setScoreboardView(g *gocui.Gui) error {
 		)
 
 		nba.scoreboard = v
-		nba.scoreboard.Frame = false
+		nba.scoreboard.Frame = false // maybe do this in the future
 		highlightView(nba.scoreboard)
 
 		if nba.gamesList == nil {
-			scoreBoardBox := NewBox(v, false)
+			scoreBoardBox := newBox(v, false)
 			nba.gamesList = scoreBoardBox
-
 		}
 
-		if len(nba.gamesList.games) == 0 {
+		if len(nba.gamesList.gameIDs) == 0 {
 			go func() {
 				nba.getScoreboard()
 			}()
 			nba.pollScoreboardData()
 		}
-
 	}
 	return nil
 }
 
-func (nba *NBAConsole) setBoxScoreView(g *gocui.Gui, gameID string) error {
-	if v, err := g.SetView(boxScoreLabel, 0 /** globalX0 */, 0 /** scoreboardY0 */, nba.curW-1, nba.curH-footerHeight-footerHeight); err != nil {
+func (nba *NBAConsole) setBoxScoreView(g *gocui.Gui) error {
+	var err error
+	if v, err := g.SetView(boxScoreLabel, 0 /** globalX0 */, 0 /** scoreboardY0 */, nba.curW-1, 6); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
 
 		nba.boxScore = v
 		nba.boxScore.Frame = false
+		if nba.selectedGameID == "" {
+			return fmt.Errorf("selectedGameID not yet set")
+		}
 
-		go func() {
-			nba.getBoxScore()
-		}()
+		go func(err error) error {
+			err = nba.getBoxScore()
+			return err
+		}(err)
 	}
-	return nil
+
+	return err
 }
 
 func (nba *NBAConsole) setFooterView(g *gocui.Gui) error {
@@ -104,7 +107,7 @@ func (nba *NBAConsole) setFooterView(g *gocui.Gui) error {
 		}
 		nba.footerView = v
 		nba.footerView.Frame = false
-		go nba.updateFooter("")
+		go nba.updateFooter()
 	}
 	return nil
 }

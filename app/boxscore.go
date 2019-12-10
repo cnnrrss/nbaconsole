@@ -12,61 +12,31 @@ import (
 	"github.com/cnnrrss/nbaconsole/common/pad"
 )
 
-// ToggleGameBoxScore toggles between the global scoreboard and the game box score
-func (nba *NBAConsole) ToggleGameBoxScore() error {
-	selectedGame := nba.SelectedGame()
-	if nba.selectedGame != selectedGame {
-		nba.selectedGame = selectedGame
+func (nba *NBAConsole) toggleGameBoxScore() error {
+	currentGameID := nba.getSelectedGameID()
+	if nba.selectedGameID != currentGameID {
+		nba.selectedGameID = currentGameID
 	}
 
-	go nba.setBoxScoreView(nba.g, nba.selectedGame)
+	go nba.getBoxScore()
 
-	return nil // TODO: handle errors gracefully
-}
-
-// SelectedGame returns the game of the highlighted row
-func (nba *NBAConsole) SelectedGame() string {
-	idx := nba.HighlightedRowIndex()
-	if len(nba.gamesList.games) == 0 {
-		return ""
-	}
-	return nba.gamesList.games[idx]
-}
-
-// HighlightedRowIndex returns the index of the highlighted row
-func (nba *NBAConsole) HighlightedRowIndex() int {
-	_, oy := nba.scoreboard.Origin()
-	_, y := nba.scoreboard.Cursor()
-	// Skip 2 static lines in the scoreboard view
-	idx := y - 2 - oy
-
-	if idx < 0 {
-		idx = 0
-	}
-
-	if idx >= len(nba.gamesList.games) {
-		idx = len(nba.gamesList.games) - 1
-	}
-	return idx
+	return nil
 }
 
 func (nba *NBAConsole) getBoxScore() error {
-	nba.g.SetCurrentView(boxScoreLabel)
-
 	params := genericParams(nba.date)
-	if nba.selectedGame == "" {
+	if nba.selectedGameID == "" {
 		nba.debuglog("error nba selected game nil")
-		panic(nba.selectedGame)
 	}
 
-	gameBoxScore := api.GameBoxScore{}
+	gameBoxScore := &api.GameBoxScore{}
 
 	// if final game not cached. // TODO: should cache all games.
 	if nba.selectedGameScore == nil ||
-		nba.selectedGameScore.ID != nba.selectedGame ||
+		nba.selectedGameScore.GameID() != nba.selectedGameID ||
 		nba.selectedGameScore.SportsContent.Game.PeriodTime.GameStatus == "3" {
 
-		resp, err := api.GetDataGameBoxScore(params, nba.selectedGame)
+		resp, err := api.GetDataGameBoxScore(params, nba.selectedGameID)
 		if err != nil {
 			return fmt.Errorf("Error with boxscore request %v", err)
 		}
@@ -79,59 +49,64 @@ func (nba *NBAConsole) getBoxScore() error {
 		if err := json.Unmarshal(body, &gameBoxScore); err != nil {
 			nba.debuglog(fmt.Sprintf("err unmarshalling %v\n", err.Error()))
 		}
-
-		nba.selectedGameScore = &GameScore{
-			gameBoxScore,
-			nba.selectedGame,
-		}
 	}
+
+	nba.selectedGameScore = gameBoxScore
 
 	nba.update(func() {
 		nba.boxScore.Clear()
-		nba.drawBoxScore(nba.boxScore, nba.selectedGameScore, 0)
+		nba.drawBoxScore(
+			nba.boxScore,
+			nba.selectedGameScore,
+			0,
+			false,
+		)
 	})
+
 	return nil
 }
 
-func (nba *NBAConsole) drawBoxScore(output io.Writer, bs *GameScore, width int) {
+func (nba *NBAConsole) drawBoxScore(output io.Writer, bs *api.GameBoxScore, width int, drawLeaders bool) {
 	var str strings.Builder
 
 	str.WriteString(fmt.Sprintf("%-25s%-4s%-4s%-4s%-5s%s\n", "Team", "1", "2", "3", "4", "T"))
 	str.WriteString(fmt.Sprintf("%s\n", pad.AddString(str.Len(), "-")))
 
-	hLine, hTotal := HomeLineScores(bs)
+	hLine, hTotal := homeLineScores(bs)
 	str.WriteString(
 		fmt.Sprintf("%-24s%-5s%4d\n",
-			api.NBATeamDictionary[bs.GameBoxScore.SportsContent.Game.Home.Abbreviation],
+			api.NBATeamDictionary[bs.SportsContent.Game.Home.Abbreviation],
 			hLine,
 			hTotal,
 		),
 	)
-	vLine, vTotal := VisitorLineScores(bs)
+	vLine, vTotal := visitorLineScores(bs)
 	str.WriteString(
 		fmt.Sprintf("%-24s%-5s%4d\n",
-			api.NBATeamDictionary[bs.GameBoxScore.SportsContent.Game.Visitor.Abbreviation],
+			api.NBATeamDictionary[bs.SportsContent.Game.Visitor.Abbreviation],
 			vLine,
 			vTotal,
 		),
 	)
 
 	fmt.Fprintln(output, str.String())
-	fmt.Fprintln(output, bs.BoxScoreLeaders())
+	if drawLeaders {
+		fmt.Fprintln(output, bs.BoxScoreLeaders())
+	}
+
 	highlightView(nba.scoreboard)
 }
 
-// HomeLineScores ...
-func HomeLineScores(bs *GameScore) (string, int) {
+func homeLineScores(bs *api.GameBoxScore) (string, int) {
 	var lineScore strings.Builder
 	var total int
-	curPeriod := len(bs.GameBoxScore.SportsContent.Game.Home.Linescores.Period)
+	curPeriod := len(bs.SportsContent.Game.Home.Linescores.Period)
 
 	for i := 0; i < curPeriod || i <= 3; i++ {
 		if i >= curPeriod {
 			lineScore.WriteString("  - ")
 		} else {
-			q, _ := strconv.Atoi(bs.GameBoxScore.SportsContent.Game.Home.Linescores.Period[i].Score)
+			q, _ := strconv.Atoi(bs.SportsContent.Game.Home.Linescores.Period[i].Score)
 			total += q
 			lineScore.WriteString(
 				fmt.Sprintf("%2d  ", q),
@@ -141,17 +116,16 @@ func HomeLineScores(bs *GameScore) (string, int) {
 	return lineScore.String(), total
 }
 
-// VisitorLineScores ...
-func VisitorLineScores(bs *GameScore) (string, int) {
+func visitorLineScores(bs *api.GameBoxScore) (string, int) {
 	var lineScore strings.Builder
 	var total int
-	curPeriod := len(bs.GameBoxScore.SportsContent.Game.Visitor.Linescores.Period)
+	curPeriod := len(bs.SportsContent.Game.Visitor.Linescores.Period)
 
 	for i := 0; i < curPeriod || i <= 3; i++ {
 		if i >= curPeriod {
 			lineScore.WriteString("  - ")
 		} else {
-			q, _ := strconv.Atoi(bs.GameBoxScore.SportsContent.Game.Visitor.Linescores.Period[i].Score)
+			q, _ := strconv.Atoi(bs.SportsContent.Game.Visitor.Linescores.Period[i].Score)
 			total += q
 			lineScore.WriteString(
 				fmt.Sprintf("%2d  ", q),
