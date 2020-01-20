@@ -1,6 +1,6 @@
 # NBA Console
 
-A minimal NBA scoreboard presented in the terminal using gocui
+A minimal NBA scoreboard terminal application using the populer gocui library
 
 ## Usage
 
@@ -41,3 +41,4 @@ BoxScore|`Ctrl+t`|View team stats for currently selected games' boxscore|
 
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/cnnrrss/nbaconsole?style=flat-square)](https://goreportcard.com/report/github.com/cnnrrss/nbaconsole)
+
